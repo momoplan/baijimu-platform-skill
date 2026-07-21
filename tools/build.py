@@ -15,12 +15,7 @@ DIST = ROOT / "dist"
 ARCHIVE = DIST / "baijimu-platform.zip"
 HASH_FILE = DIST / "baijimu-platform.zip.sha256"
 FIXED_TIME = (2026, 1, 1, 0, 0, 0)
-EXPECTED = {
-    "SKILL.md",
-    "references/cli-and-runtime-entrypoints.md",
-    "references/desktop-and-bridge-agent.md",
-    "references/platform-map.md",
-}
+EXPECTED = {"SKILL.md"}
 
 
 def fail(message: str) -> None:
@@ -62,9 +57,8 @@ def validate() -> list[Path]:
         if path.suffix.lower() != ".md":
             fail(f"distribution accepts Markdown only: {path}")
 
-    for reference in re.findall(r"`(references/[^`]+\.md)`", skill_text):
-        if not (SKILL / reference).is_file():
-            fail(f"missing referenced file: {reference}")
+    if "references/" in skill_text:
+        fail("SKILL.md must not depend on bundled references; use versioned official docs")
     return files
 
 

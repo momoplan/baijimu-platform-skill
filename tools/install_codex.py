@@ -20,6 +20,7 @@ def main() -> None:
     parser.add_argument("--codex-root", type=Path, default=default_root)
     args = parser.parse_args()
     skills_root = args.codex_root.expanduser().resolve() / "skills"
+    backups_root = args.codex_root.expanduser().resolve() / "skill-backups"
     target = skills_root / "baijimu-platform"
 
     if not ARCHIVE.is_file():
@@ -34,10 +35,18 @@ def main() -> None:
             raise SystemExit("error: archive does not contain baijimu-platform/SKILL.md")
 
         skills_root.mkdir(parents=True, exist_ok=True)
+        backups_root.mkdir(parents=True, exist_ok=True)
+        for legacy in sorted(skills_root.glob("baijimu-platform.backup-*")):
+            migrated = backups_root / legacy.name
+            if migrated.exists() or migrated.is_symlink():
+                raise SystemExit(f"error: legacy backup destination already exists: {migrated}")
+            shutil.move(str(legacy), str(migrated))
+            print(f"migrated backup {legacy} -> {migrated}")
+
         backup = None
         if target.exists() or target.is_symlink():
             stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
-            backup = skills_root / f"baijimu-platform.backup-{stamp}"
+            backup = backups_root / f"baijimu-platform.backup-{stamp}"
             if backup.exists():
                 raise SystemExit(f"error: backup path already exists: {backup}")
             shutil.move(str(target), str(backup))

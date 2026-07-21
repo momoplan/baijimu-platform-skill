@@ -5,18 +5,28 @@ description: 通过 `baijimu` CLI 使用百积木企业 AI 操作系统。用于
 
 # 百积木平台
 
-通过本机 `baijimu` CLI 操作百积木。把 CLI 视为唯一执行入口；本技能只提供文本工作流，不包含凭证、平台专属工具或私有接口。
+通过本机 `baijimu` CLI 操作百积木。把已安装 CLI 的能力输出和帮助视为执行事实来源；本技能只保存跨版本稳定的工作流，不复制会随版本变化的命令参数、资源清单或接口定义。
+
+## 能力发现
+
+1. 运行 `baijimu --version`，确认本机版本。
+2. 运行 `baijimu capabilities --help`。若帮助包含 `--offline`，运行 `baijimu capabilities --offline --json`，取得本机完整命令树和版本固定的官方文档入口；旧版 CLI 则直接依赖各级 `--help`。
+3. 查询精确参数时，优先使用本机 `baijimu <command> --help`；需要详细说明或机器结构时，只访问能力输出中 `documentation.version`、`documentation.commandSchema` 或 `documentation.offlineCapabilities` 指向的固定版本 URL。
+4. 不用通用搜索结果或官网“最新版本”页面覆盖本机 CLI 行为。固定入口缺失时，报告 CLI/文档版本不匹配。
+5. 需要账号或工作区动态资源时，运行 `baijimu auth status --verify`，再运行 `baijimu capabilities --json`；已知工作区时按本机帮助增加工作区参数。
+
+官方 CLI 文档索引为 <https://www.baijimu.com/docs/cli/>，Partner API 文档为 <https://www.baijimu.com/docs/integration/api/>。索引只用于发现；执行仍服从本机版本返回的固定入口。
+
+如果 `baijimu` 不存在，告知用户先安装官方 CLI，不要静默下载。未登录时运行 `baijimu auth login`，由用户在浏览器中完成授权。
 
 ## 标准工作流
 
-1. 运行 `baijimu --version` 和目标命令的 `--help`，确认本机安装及实际命令面。
-2. 运行 `baijimu capabilities --json` 发现当前 CLI 和公共 Bundle；已知工作区时增加 `--workspace <ID或精确名称>`。
-3. 运行 `baijimu auth status --verify`。未登录时运行 `baijimu auth login`，由用户在浏览器中完成授权。
-4. 使用 `baijimu resource ...` 或命令自身的精确名称解析，把展示名解析为稳定 ID。零匹配或多匹配时停止并请求稳定 ID。
-5. 写操作前读取当前状态，执行后用对应的 `get`、`list`、`status`、`messages`、`resources` 或审计命令回查。
-6. 汇报业务结果、稳定 ID、验证证据和仍未解决的权限或版本问题。
-
-如果 `baijimu` 不存在，告知用户先安装官方 CLI。不要静默下载二进制文件，也不要把 token 写进技能目录、命令历史、临时脚本或回复。
+1. 用本机能力输出和 `--help` 确认目标命令确实存在。
+2. 先读取目标对象和当前状态。
+3. 使用 CLI 的资源解析能力或命令自身的精确名称解析，把展示名转换为稳定 ID；零匹配或多匹配时停止并请求稳定 ID。
+4. 明确目标、参数、权限和副作用后再写入。
+5. 执行后用对应的 `get`、`list`、`status`、`messages`、`resources` 或审计命令回查；发布和服务调用还要做端到端验证。
+6. 汇报业务结果、稳定 ID、验证证据和仍未解决的版本、认证或权限问题。
 
 ## 能力路由
 
@@ -27,10 +37,8 @@ description: 通过 `baijimu` CLI 使用百积木企业 AI 操作系统。用于
 - 模块和运行时：`module`、`runtime`。
 - 托管服务和构建：`hosted-service`、`rust-build`、`db-profile`。
 - 平台应用：`platform-app`。
-- 本地 Connector：`local-app`；设备运行面仅在本机 CLI 的帮助或能力输出确认存在时使用。
+- 本地 Connector：`local-app`。设备、桌面、本地 shell 和 Connector 运行面仅在本机能力输出或帮助确认存在，且用户已完成本地端、设备、工作区与服务授权时使用。
 - CLI 未封装的公开能力：`baijimu api <METHOD> <PATH>`。调用前必须确认 Partner API 路径、参数、权限和返回结构。
-
-读取 `references/cli-and-runtime-entrypoints.md` 获取命令模式。处理桌面、本地 shell、设备或 Connector 时读取 `references/desktop-and-bridge-agent.md`。判断能力归属或排查顺序时读取 `references/platform-map.md`。
 
 ## 执行规则
 
@@ -40,6 +48,7 @@ description: 通过 `baijimu` CLI 使用百积木企业 AI 操作系统。用于
 - Runtime 调用先列服务，再读取方法定义，最后调用；所有业务参数放入 `--params` 对象，无参数也显式传 `{}`。
 - 复杂 JSON 优先写入临时文件并使用 `@file`，完成后清理不含用户资产的临时文件。
 - 不直接编辑 CLI 认证文件、Bridge Agent 配置、Connector 安装目录或 management token。
+- 本地能力排查顺序固定为：本地端运行与授权、Relay 连接、Connector 安装与启用、健康检查、服务和方法上报、调用方权限、审计与日志印证。能力不存在时报告版本或授权缺失，不用手工配置绕过。
 - 不输出 PAT、模型密钥、服务令牌、cookie 或完整认证响应。除非用户明确要求，不使用任何显示 secret 的选项。
 
 ## 风险与确认

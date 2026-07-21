@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import subprocess
 import sys
+import tempfile
 import unittest
 import zipfile
 from pathlib import Path
@@ -21,15 +22,7 @@ class DistributionTest(unittest.TestCase):
     def test_archive_is_text_only_and_portable(self) -> None:
         with zipfile.ZipFile(ARCHIVE) as archive:
             names = archive.namelist()
-            self.assertEqual(
-                names,
-                [
-                    "baijimu-platform/SKILL.md",
-                    "baijimu-platform/references/cli-and-runtime-entrypoints.md",
-                    "baijimu-platform/references/desktop-and-bridge-agent.md",
-                    "baijimu-platform/references/platform-map.md",
-                ],
-            )
+            self.assertEqual(names, ["baijimu-platform/SKILL.md"])
             for name in names:
                 self.assertTrue(name.endswith(".md"))
                 archive.read(name).decode("utf-8")
@@ -43,6 +36,26 @@ class DistributionTest(unittest.TestCase):
         recorded = HASH_FILE.read_text(encoding="utf-8").split()[0]
         actual = hashlib.sha256(ARCHIVE.read_bytes()).hexdigest()
         self.assertEqual(recorded, actual)
+
+    def test_installer_keeps_backups_outside_active_skills(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            codex_root = Path(temp_dir)
+            legacy = codex_root / "skills" / "baijimu-platform.backup-legacy"
+            legacy.mkdir(parents=True)
+            (legacy / "SKILL.md").write_text("legacy\n", encoding="utf-8")
+            command = [
+                sys.executable,
+                str(ROOT / "tools" / "install_codex.py"),
+                "--codex-root",
+                str(codex_root),
+            ]
+            subprocess.run(command, check=True)
+            subprocess.run(command, check=True)
+
+            active_names = sorted(path.name for path in (codex_root / "skills").iterdir())
+            self.assertEqual(active_names, ["baijimu-platform"])
+            backups = sorted((codex_root / "skill-backups").glob("baijimu-platform.backup-*"))
+            self.assertEqual(len(backups), 2)
 
 
 if __name__ == "__main__":
