@@ -1,6 +1,6 @@
 ---
 name: baijimu-platform
-description: 通过 `baijimu` CLI 使用百积木企业 AI 操作系统。用于登录认证，管理工作区、项目文件和 Git、智能体会话、模型凭证、Bundle、模块、运行时服务与应用、托管服务、数据库配置、平台应用、本地 Connector 和发布流程，或通过公开 Partner API 补充 CLI 尚未封装的能力。适用于任何能够读取 SKILL.md 并执行本机命令的智能体平台。
+description: 通过 `baijimu` CLI 使用百积木企业 AI 操作系统。用于登录认证，管理工作区、项目文件和 Git、智能体会话、模型凭证、Bundle-first 模块开发与统一发布、运行时服务与应用、托管服务、数据库配置、平台应用、本地 Connector，或通过公开 Partner API 补充 CLI 尚未封装的能力。适用于 Codex、WorkBuddy、钉钉悟空等能够读取 SKILL.md 并执行本机命令的智能体平台。
 ---
 
 # 百积木平台
@@ -11,7 +11,7 @@ description: 通过 `baijimu` CLI 使用百积木企业 AI 操作系统。用于
 
 1. 运行 `baijimu --version`，确认本机版本。
 2. 运行 `baijimu capabilities --help`。若帮助包含 `--offline`，运行 `baijimu capabilities --offline --json`，取得本机完整命令树和版本固定的官方文档入口；旧版 CLI 则直接依赖各级 `--help`。
-3. 查询精确参数时，优先使用本机 `baijimu <command> --help`；需要详细说明或机器结构时，只访问能力输出中 `documentation.version`、`documentation.commandSchema` 或 `documentation.offlineCapabilities` 指向的固定版本 URL。
+3. 查询精确参数时，优先使用本机 `baijimu <command> --help`；需要详细流程或机器结构时，只访问能力输出中 `documentation.version`、`documentation.commandSchema` 或 `documentation.offlineCapabilities` 指向的固定版本 URL。
 4. 不用通用搜索结果或官网“最新版本”页面覆盖本机 CLI 行为。固定入口缺失时，报告 CLI/文档版本不匹配。
 5. 需要账号或工作区动态资源时，运行 `baijimu auth status --verify`，再运行 `baijimu capabilities --json`；已知工作区时按本机帮助增加工作区参数。
 
@@ -31,10 +31,11 @@ description: 通过 `baijimu` CLI 使用百积木企业 AI 操作系统。用于
 ## 能力路由
 
 - 认证与工作区：`auth`、`workspace`、`resource`。
-- 可发现能力与安装：`capabilities`、`bundle`。
+- 可发现能力、Bundle-first 开发与安装：`capabilities`、`bundle`。
 - 项目文件与 Git：`project file`、`project git`。
 - 智能体与消息：`agent session`、`agent chat`、`llm-credential`。
-- 模块和运行时：`module`、`runtime`。
+- 模块源码项目与方法：`module project`、`module method`。
+- Bundle 内模块定义、模块版本和统一发布：以本机帮助中的 `bundle module`、`bundle version`、`bundle review`、`bundle market` 为准。
 - 托管服务和构建：`hosted-service`、`rust-build`、`db-profile`。
 - 平台应用：`platform-app`。
 - 本地 Connector：`local-app`。设备、桌面、本地 shell 和 Connector 运行面仅在本机能力输出或帮助确认存在，且用户已完成本地端、设备、工作区与服务授权时使用。
@@ -48,6 +49,8 @@ description: 通过 `baijimu` CLI 使用百积木企业 AI 操作系统。用于
 - Runtime 调用先列服务，再读取方法定义，最后调用；所有业务参数放入 `--params` 对象，无参数也显式传 `{}`。
 - 复杂 JSON 优先写入临时文件并使用 `@file`，完成后清理不含用户资产的临时文件。
 - 不直接编辑 CLI 认证文件、Bridge Agent 配置、Connector 安装目录或 management token。
+- 模块源码项目可以独立存在；模块定义必须在 Bundle 内创建。模块冻结只生成不可变内部资源，不得把它描述成独立发布、审核、市场上架或安装。
+- Bundle Manifest 必须引用精确模块版本；对外审核、市场发布、安装、升级和卸载均以 Bundle 为对象。若本机 CLI 尚未提供 `bundle module`，报告版本过旧并使用其固定版本文档，不要猜测新命令参数或退回独立模块发布。
 - 本地能力排查顺序固定为：本地端运行与授权、Relay 连接、Connector 安装与启用、健康检查、服务和方法上报、调用方权限、审计与日志印证。能力不存在时报告版本或授权缺失，不用手工配置绕过。
 - 不输出 PAT、模型密钥、服务令牌、cookie 或完整认证响应。除非用户明确要求，不使用任何显示 secret 的选项。
 
