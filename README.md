@@ -2,7 +2,7 @@
 
 一个平台无关的纯文本 Agent Skill，通过本机 [`baijimu`](https://www.npmjs.com/package/@baijimu/cli) CLI 使用百积木平台。
 
-同一份发行包适用于能够读取 `SKILL.md` 并执行本机命令的 Agent，包括 Codex、WorkBuddy 和钉钉悟空。Skill 不携带 PAT、平台私有配置或可执行脚本；所有业务操作均由已安装的 `baijimu` CLI 完成。跨版本稳定规则保存在 Skill，易变化的命令结构和详细说明发布在[官方 CLI 文档](https://www.baijimu.com/docs/cli/)中，并由 CLI 返回与本机版本严格绑定的地址。
+同一份发行包适用于能够读取 `SKILL.md` 并执行本机命令的 Agent，包括 Codex、WorkBuddy 和钉钉悟空。Skill 不携带 PAT、平台私有配置或可执行脚本；所有业务操作均由已安装的 `baijimu` CLI 完成。跨版本稳定规则保存在 Skill，易变化的命令结构和详细说明发布在[百积木官方文档站](https://docs.baijimu.com/)中，并由 CLI 返回与本机版本严格绑定的地址。
 
 ## 构建
 
@@ -34,7 +34,7 @@ Codex：
 python3 tools/install_codex.py
 ```
 
-安装器会先把已有同名技能备份到 `~/.codex/skill-backups/`，再从发行 ZIP 安装并验证内容。备份不会留在 `~/.codex/skills/` 中，因此不会被 Codex 重复发现为技能。
+安装器会把统一技能安装到 `~/.agents/skills/baijimu-platform/`，并把旧的 `baijimu-docs` 或 `~/.codex/skills/baijimu-platform` 迁移到 `~/.agents/skill-backups/`。备份不会留在技能发现目录中，因此不会被重复发现。
 
 WorkBuddy：在技能页面上传 `dist/baijimu-platform.zip`，或把仓库导入 SkillHub 后安装。
 

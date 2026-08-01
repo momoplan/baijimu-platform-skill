@@ -9,13 +9,13 @@ description: 通过 `baijimu` CLI 使用百积木企业 AI 操作系统。用于
 
 ## 能力发现
 
-1. 运行 `baijimu --version`，确认本机版本。
-2. 运行 `baijimu capabilities --help`。若帮助包含 `--offline`，运行 `baijimu capabilities --offline --json`，取得本机完整命令树和版本固定的官方文档入口；旧版 CLI 则直接依赖各级 `--help`。
+1. 运行 `baijimu --version`，确认本机版本。命令不在当前进程 `PATH` 时，先检查并直接使用官方固定安装位置：Windows 为 `$env:LOCALAPPDATA\Baijimu\bin\baijimu.exe`，macOS/Linux 为 `~/.local/bin/baijimu`。固定位置也不存在时才报告 CLI 未安装；Windows 上固定位置可用但短命令不可用时，提示用户完成当前任务后重启 Agent 或终端以读取更新后的用户 `PATH`。
+2. 使用已确认的 CLI 入口运行 `capabilities --help`。若帮助包含 `--offline`，运行 `capabilities --offline --json`，取得本机完整命令树和版本固定的官方文档入口；旧版 CLI 则直接依赖各级 `--help`。
 3. 查询精确参数时，优先使用本机 `baijimu <command> --help`；需要详细流程或机器结构时，只访问能力输出中 `documentation.version`、`documentation.commandSchema` 或 `documentation.offlineCapabilities` 指向的固定版本 URL。
 4. 不用通用搜索结果或官网“最新版本”页面覆盖本机 CLI 行为。固定入口缺失时，报告 CLI/文档版本不匹配。
 5. 需要账号或工作区动态资源时，运行 `baijimu auth status --verify`，再运行 `baijimu capabilities --json`；已知工作区时按本机帮助增加工作区参数。
 
-官方 CLI 文档索引为 <https://www.baijimu.com/docs/cli/>，Partner API 文档为 <https://www.baijimu.com/docs/integration/api/>。索引只用于发现；执行仍服从本机版本返回的固定入口。
+百积木官方文档站为 <https://docs.baijimu.com/>：CLI 索引为 <https://docs.baijimu.com/cli/>，Bundle 开发规范为 <https://docs.baijimu.com/development/bundle-development/>，Partner API 为 <https://docs.baijimu.com/integration/api/>。`https://www.baijimu.com/docs/` 是兼容重定向入口；不要据此手工拼接版本 URL。索引只用于发现，执行仍服从本机 CLI 返回的固定入口；固定版本页面或 JSON 不可访问时，明确报告该 CLI 版本的文档尚未发布，不得改用其他版本猜测参数。
 
 如果 `baijimu` 不存在，告知用户先安装官方 CLI，不要静默下载。未登录时运行 `baijimu auth login`，由用户在浏览器中完成授权。
 
