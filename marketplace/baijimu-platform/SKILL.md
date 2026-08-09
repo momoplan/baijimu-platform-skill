@@ -1,6 +1,22 @@
 ---
 name: baijimu-platform
 description: 通过 `baijimu` CLI 使用百积木企业 AI 操作系统。用于登录认证，管理工作区、项目文件和 Git、智能体会话、模型凭证、Bundle-first 模块开发与统一发布、运行时服务与应用、托管服务、数据库配置、平台应用、本地 Connector，或通过公开 Partner API 补充 CLI 尚未封装的能力。适用于 Codex、Claude Code、WorkBuddy、钉钉悟空、OpenClaw、Hermes 等能够读取 SKILL.md 并执行本机命令的智能体平台。
+version: 1.4.0
+author: Baijimu
+license: MIT-0
+platforms: [openclaw, hermes]
+metadata:
+  openclaw:
+    requires:
+      bins: [baijimu]
+    install:
+      - kind: node
+        package: "@baijimu/cli"
+        bins: [baijimu]
+    homepage: https://github.com/momoplan/baijimu-platform-skill
+  hermes:
+    tags: [baijimu, lowcode, automation, cli]
+    requires_toolsets: [terminal]
 ---
 
 # 百积木平台

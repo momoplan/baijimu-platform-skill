@@ -13,4 +13,5 @@ jobs:
         with:
           python-version: "3.12"
       - run: python3 tools/build.py
+      - run: git diff --exit-code -- marketplace/baijimu-platform/SKILL.md
       - run: python3 -m unittest discover -s tests -v

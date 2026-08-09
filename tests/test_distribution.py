@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import re
 import subprocess
 import sys
 import tempfile
@@ -12,6 +13,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 ARCHIVE = ROOT / "dist" / "baijimu-platform.zip"
 HASH_FILE = ROOT / "dist" / "baijimu-platform.zip.sha256"
+MARKETPLACE_SKILL = ROOT / "marketplace" / "baijimu-platform" / "SKILL.md"
 
 
 class DistributionTest(unittest.TestCase):
@@ -36,6 +38,41 @@ class DistributionTest(unittest.TestCase):
         recorded = HASH_FILE.read_text(encoding="utf-8").split()[0]
         actual = hashlib.sha256(ARCHIVE.read_bytes()).hexdigest()
         self.assertEqual(recorded, actual)
+
+    def test_marketplace_skill_is_generated_from_canonical_source(self) -> None:
+        source = (ROOT / "SKILL.md").read_text(encoding="utf-8")
+        marketplace = MARKETPLACE_SKILL.read_text(encoding="utf-8")
+        source_match = re.match(r"\A---\n.*?\n---\n", source, re.DOTALL)
+        marketplace_match = re.match(r"\A---\n(.*?)\n---\n", marketplace, re.DOTALL)
+        self.assertIsNotNone(source_match)
+        self.assertIsNotNone(marketplace_match)
+        assert source_match is not None
+        assert marketplace_match is not None
+        self.assertEqual(source[source_match.end() :], marketplace[marketplace_match.end() :])
+
+        version = (ROOT / "VERSION").read_text(encoding="utf-8").strip()
+        metadata = marketplace_match.group(1)
+        self.assertIn(f"version: {version}", metadata)
+        self.assertIn("license: MIT-0", metadata)
+        self.assertIn("platforms: [openclaw, hermes]", metadata)
+        self.assertIn("  openclaw:", metadata)
+        self.assertIn("      bins: [baijimu]", metadata)
+        self.assertIn('        package: "@baijimu/cli"', metadata)
+        self.assertIn("  hermes:", metadata)
+        self.assertIn("    requires_toolsets: [terminal]", metadata)
+
+    def test_marketplace_folder_contains_only_the_publishable_skill(self) -> None:
+        files = sorted(
+            path.relative_to(MARKETPLACE_SKILL.parent).as_posix()
+            for path in MARKETPLACE_SKILL.parent.rglob("*")
+            if path.is_file()
+        )
+        self.assertEqual(files, ["SKILL.md"])
+
+    def test_repository_license_matches_clawhub_license(self) -> None:
+        license_text = (ROOT / "LICENSE").read_text(encoding="utf-8")
+        self.assertTrue(license_text.startswith("MIT No Attribution\n"))
+        self.assertIn("without limitation the rights", license_text)
 
     def test_installer_unifies_legacy_skills_and_is_idempotent(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
