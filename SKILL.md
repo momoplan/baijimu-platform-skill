@@ -15,7 +15,7 @@ description: 通过 `baijimu` CLI 使用百积木企业 AI 操作系统。用于
 4. 不用通用搜索结果或官网“最新版本”页面覆盖本机 CLI 行为。固定入口缺失时，报告 CLI/文档版本不匹配。
 5. 需要账号或工作区动态资源时，运行 `baijimu auth status --verify`，再运行 `baijimu capabilities --json`；已知工作区时按本机帮助增加工作区参数。
 
-百积木官方文档站为 <https://docs.baijimu.com/>：CLI 索引为 <https://docs.baijimu.com/cli/>，Bundle 开发规范为 <https://docs.baijimu.com/development/bundle-development/>，Agent 修改与发布清单为 <https://docs.baijimu.com/development/bundle-development/agent-workflow/>，HTTP `methodBody` 源契约为 <https://docs.baijimu.com/development/bundle-development/module-development/http-method-body/>，Partner API 为 <https://docs.baijimu.com/integration/api/>。`https://www.baijimu.com/docs/` 是兼容重定向入口；不要据此手工拼接版本 URL。索引只用于发现，执行仍服从本机 CLI 返回的固定入口；固定版本页面或 JSON 不可访问时，明确报告该 CLI 版本的文档尚未发布，不得改用其他版本猜测参数。
+百积木官方文档站为 <https://docs.baijimu.com/>：CLI 索引为 <https://docs.baijimu.com/cli/>，Bundle 开发规范为 <https://docs.baijimu.com/development/bundle-development/>，Bundle 修改与发布清单为 <https://docs.baijimu.com/development/bundle-development/change-and-release/>，HTTP `methodBody` 源契约为 <https://docs.baijimu.com/development/bundle-development/module-development/http-method-body/>，Partner API 为 <https://docs.baijimu.com/integration/api/>。`https://www.baijimu.com/docs/` 是兼容重定向入口；不要据此手工拼接版本 URL。索引只用于发现，执行仍服从本机 CLI 返回的固定入口；固定版本页面或 JSON 不可访问时，明确报告该 CLI 版本的文档尚未发布，不得改用其他版本猜测参数。
 
 如果 `baijimu` 不存在，告知用户先安装官方 CLI，不要静默下载。未登录时运行 `baijimu auth login`，由用户在浏览器中完成授权。
 
@@ -28,7 +28,7 @@ description: 通过 `baijimu` CLI 使用百积木企业 AI 操作系统。用于
 5. 执行后用对应的 `get`、`list`、`status`、`messages`、`resources` 或审计命令回查；发布和服务调用还要做端到端验证。
 6. 汇报业务结果、稳定 ID、验证证据和仍未解决的版本、认证或权限问题。
 
-修改 Bundle、模块源码或项目文件时，完整执行官方 Agent 清单：固定版本文档、验证认证、读取源事实、修改并检查差异、提交项目 Git、冻结模块版本、更新 Manifest、发布不可变 Bundle 版本、回查工作区审核、提交并回查市场审核、安装或升级、验证资源台账和真实运行时调用。权限或人工审核未完成时停在对应阶段，不能把“已提交”报告成“已发布”。
+修改 Bundle、模块源码或项目文件时，完整执行官方 Bundle 修改与发布清单：固定版本文档、验证认证、读取源事实、修改并检查差异、提交项目 Git、创建模块版本、更新 Manifest、发布不可变 Bundle 版本、回查工作区审核、提交并回查市场审核、安装或升级、验证资源台账和真实运行时调用。权限或人工审核未完成时停在对应阶段，不能把“已提交”报告成“已发布”。
 
 ## 能力路由
 

@@ -69,13 +69,13 @@ class DistributionTest(unittest.TestCase):
         )
         self.assertEqual(files, ["SKILL.md"])
 
-    def test_skill_routes_bundle_agents_to_the_canonical_publish_contract(self) -> None:
+    def test_skill_routes_bundle_changes_to_the_canonical_publish_contract(self) -> None:
         skill = (ROOT / "SKILL.md").read_text(encoding="utf-8")
         for required in [
-            "https://docs.baijimu.com/development/bundle-development/agent-workflow/",
+            "https://docs.baijimu.com/development/bundle-development/change-and-release/",
             "https://docs.baijimu.com/development/bundle-development/module-development/http-method-body/",
             "snake_case",
-            "冻结模块版本",
+            "创建模块版本",
             "发布不可变 Bundle 版本",
             "回查工作区审核",
             "验证资源台账和真实运行时调用",
