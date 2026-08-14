@@ -15,7 +15,7 @@ description: 通过 `baijimu` CLI 使用百积木企业 AI 操作系统。用于
 4. 不用通用搜索结果或官网“最新版本”页面覆盖本机 CLI 行为。固定入口缺失时，报告 CLI/文档版本不匹配。
 5. 需要账号或工作区动态资源时，运行 `baijimu auth status --verify`，再运行 `baijimu capabilities --json`；已知工作区时按本机帮助增加工作区参数。
 
-百积木官方文档站为 <https://docs.baijimu.com/>：CLI 索引为 <https://docs.baijimu.com/cli/>，Bundle 开发规范为 <https://docs.baijimu.com/development/bundle-development/>，Partner API 为 <https://docs.baijimu.com/integration/api/>。`https://www.baijimu.com/docs/` 是兼容重定向入口；不要据此手工拼接版本 URL。索引只用于发现，执行仍服从本机 CLI 返回的固定入口；固定版本页面或 JSON 不可访问时，明确报告该 CLI 版本的文档尚未发布，不得改用其他版本猜测参数。
+百积木官方文档站为 <https://docs.baijimu.com/>：CLI 索引为 <https://docs.baijimu.com/cli/>，Bundle 开发规范为 <https://docs.baijimu.com/development/bundle-development/>，Agent 修改与发布清单为 <https://docs.baijimu.com/development/bundle-development/agent-workflow/>，HTTP `methodBody` 源契约为 <https://docs.baijimu.com/development/bundle-development/module-development/http-method-body/>，Partner API 为 <https://docs.baijimu.com/integration/api/>。`https://www.baijimu.com/docs/` 是兼容重定向入口；不要据此手工拼接版本 URL。索引只用于发现，执行仍服从本机 CLI 返回的固定入口；固定版本页面或 JSON 不可访问时，明确报告该 CLI 版本的文档尚未发布，不得改用其他版本猜测参数。
 
 如果 `baijimu` 不存在，告知用户先安装官方 CLI，不要静默下载。未登录时运行 `baijimu auth login`，由用户在浏览器中完成授权。
 
@@ -27,6 +27,8 @@ description: 通过 `baijimu` CLI 使用百积木企业 AI 操作系统。用于
 4. 明确目标、参数、权限和副作用后再写入。
 5. 执行后用对应的 `get`、`list`、`status`、`messages`、`resources` 或审计命令回查；发布和服务调用还要做端到端验证。
 6. 汇报业务结果、稳定 ID、验证证据和仍未解决的版本、认证或权限问题。
+
+修改 Bundle、模块源码或项目文件时，完整执行官方 Agent 清单：固定版本文档、验证认证、读取源事实、修改并检查差异、提交项目 Git、冻结模块版本、更新 Manifest、发布不可变 Bundle 版本、回查工作区审核、提交并回查市场审核、安装或升级、验证资源台账和真实运行时调用。权限或人工审核未完成时停在对应阶段，不能把“已提交”报告成“已发布”。
 
 ## 能力路由
 
@@ -50,7 +52,9 @@ description: 通过 `baijimu` CLI 使用百积木企业 AI 操作系统。用于
 - 复杂 JSON 优先写入临时文件并使用 `@file`，完成后清理不含用户资产的临时文件。
 - 不直接编辑 CLI 认证文件、Bridge Agent 配置、Connector 安装目录或 management token。
 - 模块源码项目可以独立存在；模块定义必须在 Bundle 内创建。模块冻结只生成不可变内部资源，不得把它描述成独立发布、审核、市场上架或安装。
+- HTTP 方法 `methodBody` 的可修改生产者必须直接写官方源契约规定的 snake_case。历史驼峰只允许在受控读取边界转换；发生保存时输出规范字段，规范字段与历史别名冲突时拒绝，不能猜测或继续产生旧字段。这个规则不能扩展成对 `module.json` 或方法外层协议的全文件机械重命名。
 - Bundle Manifest 必须引用精确模块版本；对外审核、市场发布、安装、升级和卸载均以 Bundle 为对象。若本机 CLI 尚未提供 `bundle module`，报告版本过旧并使用其固定版本文档，不要猜测新命令参数或退回独立模块发布。
+- 项目文档和本技能不授予工作区、发布或审核权限。发布者与审核者边界由平台状态源执行，不得用同一身份自行批准、伪造审核状态或直接修改服务器绕过流程。
 - 本地能力排查顺序固定为：本地端运行与授权、Relay 连接、Connector 安装与启用、健康检查、服务和方法上报、调用方权限、审计与日志印证。能力不存在时报告版本或授权缺失，不用手工配置绕过。
 - 不输出 PAT、模型密钥、服务令牌、cookie 或完整认证响应。除非用户明确要求，不使用任何显示 secret 的选项。
 

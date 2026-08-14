@@ -69,6 +69,20 @@ class DistributionTest(unittest.TestCase):
         )
         self.assertEqual(files, ["SKILL.md"])
 
+    def test_skill_routes_bundle_agents_to_the_canonical_publish_contract(self) -> None:
+        skill = (ROOT / "SKILL.md").read_text(encoding="utf-8")
+        for required in [
+            "https://docs.baijimu.com/development/bundle-development/agent-workflow/",
+            "https://docs.baijimu.com/development/bundle-development/module-development/http-method-body/",
+            "snake_case",
+            "冻结模块版本",
+            "发布不可变 Bundle 版本",
+            "回查工作区审核",
+            "验证资源台账和真实运行时调用",
+            "不得用同一身份自行批准",
+        ]:
+            self.assertIn(required, skill)
+
     def test_repository_license_matches_clawhub_license(self) -> None:
         license_text = (ROOT / "LICENSE").read_text(encoding="utf-8")
         self.assertTrue(license_text.startswith("MIT No Attribution\n"))
