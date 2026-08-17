@@ -1,7 +1,7 @@
 ---
 name: baijimu-platform
 description: 通过 `baijimu` CLI 使用百积木企业 AI 操作系统。用于登录认证，管理工作区、项目文件和 Git、智能体会话、模型凭证、Bundle-first 模块开发与统一发布、运行时服务与应用、托管服务、数据库配置、平台应用、本地 Connector，或通过公开 Partner API 补充 CLI 尚未封装的能力。适用于 Codex、Claude Code、WorkBuddy、钉钉悟空、OpenClaw、Hermes 等能够读取 SKILL.md 并执行本机命令的智能体平台。
-version: 1.5.2
+version: 1.5.3
 author: Baijimu
 license: MIT-0
 platforms: [openclaw, hermes]
@@ -50,7 +50,7 @@ metadata:
 
 - 认证与工作区：`auth`、`workspace`、`resource`。
 - 可发现能力、Bundle-first 开发与安装：`capabilities`、`bundle`。
-- 项目文件与 Git：`project file` 仅用于 list/read/grep/download；修改必须通过 `project checkout` 检出 canonical 仓库，在生成的 Codex 分支上使用本地 Git 提交并推送，再用 `project merge` 合入受保护的 `main`。
+- 项目文件与 Git：`project file` 仅用于 list/read/grep/download；修改必须通过 `project checkout` 检出 canonical 仓库。操作前先用本机帮助确认并运行 `project branch-policy get` 读取实际策略：`DIRECT` 允许有项目 Git 写权限的成员以快进方式直推 `main`；`PROTECTED` 必须推送 `codex/<userId>/<branch>` 个人分支，再用 `project merge` 合入 `main`，用户可以合并自己的分支。两种策略都禁止删除、强推或非快进覆盖 `main`。不要根据成员角色或历史默认值猜测策略；本机 CLI 没有 `branch-policy` 时，报告版本不匹配并使用该版本固定文档，不得猜测。权威设计见 <https://docs.baijimu.com/concepts/projects/>。
 - 智能体与消息：`agent session`、`agent chat`、`llm-credential`。
 - 模块源码项目与方法：`module project`、`module method`。
 - Bundle 内模块定义、模块版本和统一发布：以本机帮助中的 `bundle module`、`bundle version`、`bundle review`、`bundle market` 为准。

@@ -83,6 +83,20 @@ class DistributionTest(unittest.TestCase):
         ]:
             self.assertIn(required, skill)
 
+    def test_skill_routes_project_git_by_live_main_policy(self) -> None:
+        skill = (ROOT / "SKILL.md").read_text(encoding="utf-8")
+        for required in [
+            "project branch-policy get",
+            "`DIRECT`",
+            "`PROTECTED`",
+            "快进方式直推 `main`",
+            "用户可以合并自己的分支",
+            "两种策略都禁止删除、强推或非快进覆盖 `main`",
+            "https://docs.baijimu.com/concepts/projects/",
+        ]:
+            self.assertIn(required, skill)
+        self.assertNotIn("修改必须通过 `project checkout` 检出 canonical 仓库，在生成的 Codex 分支上", skill)
+
     def test_repository_license_matches_clawhub_license(self) -> None:
         license_text = (ROOT / "LICENSE").read_text(encoding="utf-8")
         self.assertTrue(license_text.startswith("MIT No Attribution\n"))
