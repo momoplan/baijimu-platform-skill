@@ -1,7 +1,7 @@
 ---
 name: baijimu-platform
 description: 通过 `baijimu` CLI 使用百积木企业 AI 操作系统。用于登录认证，管理工作区、项目文件和 Git、智能体会话、模型凭证、Bundle-first 模块开发与统一发布、运行时服务与应用、托管服务、数据库配置、平台应用、本地 Connector，或通过公开 Partner API 补充 CLI 尚未封装的能力。适用于 Codex、Claude Code、WorkBuddy、钉钉悟空、OpenClaw、Hermes 等能够读取 SKILL.md 并执行本机命令的智能体平台。
-version: 1.5.3
+version: 1.5.4
 author: Baijimu
 license: MIT-0
 platforms: [openclaw, hermes]
@@ -32,6 +32,8 @@ metadata:
 5. 需要账号或工作区动态资源时，运行 `baijimu auth status --verify`，再运行 `baijimu capabilities --json`；已知工作区时按本机帮助增加工作区参数。
 
 百积木官方文档站为 <https://docs.baijimu.com/>：CLI 索引为 <https://docs.baijimu.com/cli/>，Bundle 开发规范为 <https://docs.baijimu.com/development/bundle-development/>，Bundle 修改与发布清单为 <https://docs.baijimu.com/development/bundle-development/change-and-release/>，HTTP `methodBody` 源契约为 <https://docs.baijimu.com/development/bundle-development/module-development/http-method-body/>，Partner API 为 <https://docs.baijimu.com/integration/api/>。`https://www.baijimu.com/docs/` 是兼容重定向入口；不要据此手工拼接版本 URL。索引只用于发现，执行仍服从本机 CLI 返回的固定入口；固定版本页面或 JSON 不可访问时，明确报告该 CLI 版本的文档尚未发布，不得改用其他版本猜测参数。
+
+面向普通用户和开发者的稳定产品契约只以官方文档站为准，不得改用复制这些流程的专项技能。专项技能只允许补充不适合公开文档的内部架构、发布和排障机制；一旦任务进入公开的创建、配置、开发、发布、安装或调用流程，必须回到本技能、当前 CLI 帮助和官方固定版本文档。
 
 如果 `baijimu` 不存在，告知用户先安装官方 CLI，不要静默下载。未登录时运行 `baijimu auth login`，由用户在浏览器中完成授权。
 

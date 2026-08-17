@@ -80,6 +80,8 @@ class DistributionTest(unittest.TestCase):
             "回查工作区审核",
             "验证资源台账和真实运行时调用",
             "不得用同一身份自行批准",
+            "面向普通用户和开发者的稳定产品契约只以官方文档站为准",
+            "不得改用复制这些流程的专项技能",
         ]:
             self.assertIn(required, skill)
 
