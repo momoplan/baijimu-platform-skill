@@ -1,7 +1,7 @@
 ---
 name: baijimu-platform
 description: 通过 `baijimu` CLI 使用百积木企业 AI 操作系统。用于登录认证，管理工作区、项目文件和 Git、智能体会话、模型凭证、Bundle-first 模块开发与统一发布、运行时服务与应用、托管服务、数据库配置、平台应用、本地 Connector，或通过公开 Partner API 补充 CLI 尚未封装的能力。适用于 Codex、Claude Code、WorkBuddy、钉钉悟空、OpenClaw、Hermes 等能够读取 SKILL.md 并执行本机命令的智能体平台。
-version: 1.5.4
+version: 1.5.5
 author: Baijimu
 license: MIT-0
 platforms: [openclaw, hermes]
@@ -30,6 +30,8 @@ metadata:
 3. 查询精确参数时，优先使用本机 `baijimu <command> --help`；需要详细流程或机器结构时，只访问能力输出中 `documentation.version`、`documentation.commandSchema` 或 `documentation.offlineCapabilities` 指向的固定版本 URL。
 4. 不用通用搜索结果或官网“最新版本”页面覆盖本机 CLI 行为。固定入口缺失时，报告 CLI/文档版本不匹配。
 5. 需要账号或工作区动态资源时，运行 `baijimu auth status --verify`，再运行 `baijimu capabilities --json`；已知工作区时按本机帮助增加工作区参数。
+6. 不自行拼接或探测未由当前 CLI 能力输出、帮助或固定版本文档返回的域名。Bundle 市场操作通过当前 CLI 和 `https://api.baijimu.com` 的统一 Partner API 完成；`bundle-market.baijimu.com` 是已退役入口，其 DNS 不解析不是服务故障，也不能作为升级 CLI 的依据。只有本机命令面、固定版本文档或实际命令明确显示版本不兼容时，才报告需要升级。
+7. 把工作区选择与平台健康分开判断。已有项目属于哪个工作区就使用哪个工作区；只有用户明确需要独立成员、权限、计费、数据隔离或产品归属，或者没有合适的目标工作区时，才建议新建。不得根据 DNS、网络探测或 CLI 健康状态推断需要新建工作区。
 
 百积木官方文档站为 <https://docs.baijimu.com/>：CLI 索引为 <https://docs.baijimu.com/cli/>，Bundle 开发规范为 <https://docs.baijimu.com/development/bundle-development/>，Bundle 修改与发布清单为 <https://docs.baijimu.com/development/bundle-development/change-and-release/>，HTTP `methodBody` 源契约为 <https://docs.baijimu.com/development/bundle-development/module-development/http-method-body/>，Partner API 为 <https://docs.baijimu.com/integration/api/>。`https://www.baijimu.com/docs/` 是兼容重定向入口；不要据此手工拼接版本 URL。索引只用于发现，执行仍服从本机 CLI 返回的固定入口；固定版本页面或 JSON 不可访问时，明确报告该 CLI 版本的文档尚未发布，不得改用其他版本猜测参数。
 
@@ -66,6 +68,7 @@ metadata:
 - 不编造 workspaceId、projectId、businessId、method、connectorId、moduleId、versionId、sessionId 或发布 ID。
 - 不把展示名、模糊搜索结果第一项或缓存状态当作协议标识。
 - 不熟悉命令时先运行相应的 `--help`；帮助中不存在的命令不得执行。
+- 不把未登记域名的 DNS 结果描述成平台、Bundle 市场、认证或工作区故障；必须保留实际 CLI 命令、错误码和固定版本入口作为判断证据。
 - Runtime 调用先列服务，再读取方法定义，最后调用；所有业务参数放入 `--params` 对象，无参数也显式传 `{}`。
 - 复杂 JSON 优先写入临时文件并使用 `@file`，完成后清理不含用户资产的临时文件。
 - 不直接编辑 CLI 认证文件、Bridge Agent 配置、Connector 安装目录或 management token。

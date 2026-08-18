@@ -82,6 +82,9 @@ class DistributionTest(unittest.TestCase):
             "不得用同一身份自行批准",
             "面向普通用户和开发者的稳定产品契约只以官方文档站为准",
             "不得改用复制这些流程的专项技能",
+            "bundle-market.baijimu.com` 是已退役入口",
+            "不得根据 DNS、网络探测或 CLI 健康状态推断需要新建工作区",
+            "不把未登记域名的 DNS 结果描述成平台、Bundle 市场、认证或工作区故障",
         ]:
             self.assertIn(required, skill)
 
