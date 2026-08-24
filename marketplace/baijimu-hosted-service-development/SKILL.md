@@ -1,7 +1,7 @@
 ---
 name: baijimu-hosted-service-development
-description: 使用 `baijimu` CLI 开发和部署 Hosted Service 后端，包括独立 Project/Git、Rust BuildJob 与 Artifact、数据库迁移 Artifact、Environment、Slot、Deployment、Endpoint、配置和服务鉴权。用于普通后端应用交付；不用于 Bundle/Module 生命周期、平台服务发布或基础设施变更。
-version: 1.6.0
+description: 使用 `baijimu` CLI 开发和部署 Hosted Service 后端，包括独立 Project/Git、Rust BuildJob、统一 Artifact 目录、数据库迁移 Artifact、Environment、Slot、Deployment、Endpoint、配置和服务鉴权。用于普通后端应用交付；不用于 Bundle/Module 生命周期、平台服务发布或基础设施变更。
+version: 1.6.1
 author: Baijimu
 license: MIT-0
 platforms: [openclaw, hermes]
@@ -39,7 +39,10 @@ Deployment、Endpoint、配置、鉴权和迁移执行都通过真实 `projectId
 ## 所有权边界
 
 - `project-service` 拥有 Project、文件和 Git。
-- `rust-build-service` 从 Project 的完整 Git commit 创建 BuildJob 和不可变运行/迁移 Artifact。
+- `rust-build-service` 从 Project 的完整 Git commit 创建 BuildJob，并在构建成功后向 `artifact-service`
+  登记不可变运行/迁移 Artifact。
+- `artifact-service` 拥有统一 Artifact 目录、workspace/Project 归属及 Artifact 查询；CLI 把查询放在
+  `rust-build artifact` 命令组下只是工作流分组，不改变服务所有权。
 - `db-service` 拥有 Database Instance、Logical Database、Profile、Allocation 和连接配置解析。
 - Hosted Service 能力拥有 Project Environment、Deployment、Endpoint、配置/鉴权绑定和数据库迁移
   Operation/Attempt；它只消费已有 `artifactId`，不在部署时构建。
@@ -49,7 +52,8 @@ Deployment、Endpoint、配置、鉴权和迁移执行都通过真实 `projectId
 ## 构建与部署
 
 1. 提交源码并取得完整 Git commit ID。
-2. 用该 commit 创建运行 BuildJob；成功后读取真实 `artifactId`，不要把 `buildJobId` 当制品。
+2. 用该 commit 创建运行 BuildJob；成功后从统一 Artifact 目录读取真实 `artifactId`，不要把
+   `buildJobId` 当制品。
 3. 创建或读取 Project Environment，按需绑定 Slot、Logical Database 和配置 Provider。
 4. 部署明确的运行 Artifact；部署后查询 deployment，验证 Endpoint、健康、鉴权和真实业务请求。
 

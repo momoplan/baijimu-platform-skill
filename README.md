@@ -5,8 +5,8 @@
 
 - `baijimu-platform`：认证、能力发现、工作区、Project/Git 和通用能力路由。
 - `baijimu-bundle-development`：Bundle-first 的 Module、资源、审核、市场和 Runtime 安装生命周期。
-- `baijimu-hosted-service-development`：后端 Project、BuildJob/Artifact、数据库迁移、Environment、
-  Deployment 和 Endpoint。
+- `baijimu-hosted-service-development`：后端 Project、BuildJob、统一 Artifact 目录、数据库迁移、
+  Environment、Deployment 和 Endpoint。
 
 技能只保存跨版本稳定边界。易变化的参数、命令结构和详细协议发布在
 [百积木官方文档站](https://docs.baijimu.com/)中，并由 CLI 返回与本机版本严格绑定的地址。

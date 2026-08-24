@@ -1,7 +1,7 @@
 ---
 name: baijimu-bundle-development
 description: 使用 `baijimu` CLI 开发、冻结、审核、发布、安装、升级或卸载 Bundle，以及在 Bundle 内开发 Module、Skill、Agent 和平台应用资源。用于 Bundle-first 公开产品生命周期；不用于 Hosted Service 后端构建、数据库迁移或平台内部发布。
-version: 1.6.0
+version: 1.6.1
 author: Baijimu
 license: MIT-0
 platforms: [openclaw, hermes]
