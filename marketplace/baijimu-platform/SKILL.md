@@ -1,7 +1,7 @@
 ---
 name: baijimu-platform
-description: 通过 `baijimu` CLI 使用百积木企业 AI 操作系统。用于登录认证，管理工作区、项目文件和 Git、智能体会话、模型凭证、Bundle-first 模块开发与统一发布、运行时服务与应用、托管服务、数据库配置、平台应用、本地 Connector，或通过公开 Partner API 补充 CLI 尚未封装的能力。适用于 Codex、Claude Code、WorkBuddy、钉钉悟空、OpenClaw、Hermes 等能够读取 SKILL.md 并执行本机命令的智能体平台。
-version: 1.5.5
+description: 通过 `baijimu` CLI 使用百积木企业 AI 操作系统的基础入口。用于登录认证、能力发现、工作区、项目文件与 Git、智能体会话、模型凭证、平台应用、本地 Connector 和公开 Partner API，并把 Bundle 开发或 Hosted Service 后端开发路由到对应场景技能。适用于能够读取 SKILL.md 并执行本机命令的智能体平台。
+version: 1.6.0
 author: Baijimu
 license: MIT-0
 platforms: [openclaw, hermes]
@@ -33,9 +33,9 @@ metadata:
 6. 不自行拼接或探测未由当前 CLI 能力输出、帮助或固定版本文档返回的域名。Bundle 市场操作通过当前 CLI 和 `https://api.baijimu.com` 的统一 Partner API 完成；`bundle-market.baijimu.com` 是已退役入口，其 DNS 不解析不是服务故障，也不能作为升级 CLI 的依据。只有本机命令面、固定版本文档或实际命令明确显示版本不兼容时，才报告需要升级。
 7. 把工作区选择与平台健康分开判断。已有项目属于哪个工作区就使用哪个工作区；只有用户明确需要独立成员、权限、计费、数据隔离或产品归属，或者没有合适的目标工作区时，才建议新建。不得根据 DNS、网络探测或 CLI 健康状态推断需要新建工作区。
 
-百积木官方文档站为 <https://docs.baijimu.com/>：CLI 索引为 <https://docs.baijimu.com/cli/>，Bundle 开发规范为 <https://docs.baijimu.com/development/bundle-development/>，Bundle 修改与发布清单为 <https://docs.baijimu.com/development/bundle-development/change-and-release/>，HTTP `methodBody` 源契约为 <https://docs.baijimu.com/development/bundle-development/module-development/http-method-body/>，Partner API 为 <https://docs.baijimu.com/integration/api/>。`https://www.baijimu.com/docs/` 是兼容重定向入口；不要据此手工拼接版本 URL。索引只用于发现，执行仍服从本机 CLI 返回的固定入口；固定版本页面或 JSON 不可访问时，明确报告该 CLI 版本的文档尚未发布，不得改用其他版本猜测参数。
+百积木官方文档站为 <https://docs.baijimu.com/>：CLI 索引为 <https://docs.baijimu.com/cli/>，Partner API 为 <https://docs.baijimu.com/integration/api/>。`https://www.baijimu.com/docs/` 是兼容重定向入口；不要据此手工拼接版本 URL。索引只用于发现，执行仍服从本机 CLI 返回的固定入口；固定版本页面或 JSON 不可访问时，明确报告该 CLI 版本的文档尚未发布，不得改用其他版本猜测参数。
 
-面向普通用户和开发者的稳定产品契约只以官方文档站为准，不得改用复制这些流程的专项技能。专项技能只允许补充不适合公开文档的内部架构、发布和排障机制；一旦任务进入公开的创建、配置、开发、发布、安装或调用流程，必须回到本技能、当前 CLI 帮助和官方固定版本文档。
+面向普通用户和开发者的稳定产品契约只以官方文档站为准。场景技能只保存跨版本边界和执行顺序，必须继续读取当前 CLI 帮助及其固定版本文档，不能用技能正文覆盖实时命令面。
 
 如果 `baijimu` 不存在，告知用户先安装官方 CLI，不要静默下载。未登录时运行 `baijimu auth login`，由用户在浏览器中完成授权。
 
@@ -48,17 +48,15 @@ metadata:
 5. 执行后用对应的 `get`、`list`、`status`、`messages`、`resources` 或审计命令回查；发布和服务调用还要做端到端验证。
 6. 汇报业务结果、稳定 ID、验证证据和仍未解决的版本、认证或权限问题。
 
-修改 Bundle、模块源码或项目文件时，完整执行官方 Bundle 修改与发布清单：固定版本文档、验证认证、读取源事实、修改并检查差异、提交项目 Git、创建模块版本、更新 Manifest、发布不可变 Bundle 版本、回查工作区审核、提交并回查市场审核、安装或升级、验证资源台账和真实运行时调用。权限或人工审核未完成时停在对应阶段，不能把“已提交”报告成“已发布”。
-
 ## 能力路由
 
 - 认证与工作区：`auth`、`workspace`、`resource`。
-- 可发现能力、Bundle-first 开发与安装：`capabilities`、`bundle`。
+- 可发现能力：`capabilities`。
 - 项目文件与 Git：`project file` 仅用于 list/read/grep/download；修改必须通过 `project checkout` 检出 canonical 仓库。操作前先用本机帮助确认并运行 `project branch-policy get` 读取实际策略：`DIRECT` 允许有项目 Git 写权限的成员以快进方式直推 `main`；`PROTECTED` 必须推送 `codex/<userId>/<branch>` 个人分支，再用 `project merge` 合入 `main`，用户可以合并自己的分支。两种策略都禁止删除、强推或非快进覆盖 `main`。不要根据成员角色或历史默认值猜测策略；本机 CLI 没有 `branch-policy` 时，报告版本不匹配并使用该版本固定文档，不得猜测。权威设计见 <https://docs.baijimu.com/concepts/projects/>。
 - 智能体与消息：`agent session`、`agent chat`、`llm-credential`。
-- 模块源码项目与方法：`module project`、`module method`。
-- Bundle 内模块定义、模块版本和统一发布：以本机帮助中的 `bundle module`、`bundle version`、`bundle review`、`bundle market` 为准。
-- 托管服务和构建：`hosted-service`、`rust-build`、`db-profile`。
+- Bundle、Module、平台应用和 Runtime Bundle 生命周期：切换到 `$baijimu-bundle-development`。
+- Hosted Service 后端项目、构建、数据库迁移、Environment、Deployment 和 Endpoint：切换到
+  `$baijimu-hosted-service-development`。
 - 平台应用：`platform-app`。
 - 本地 Connector：`local-app`。设备、桌面、本地 shell 和 Connector 运行面仅在本机能力输出或帮助确认存在，且用户已完成本地端、设备、工作区与服务授权时使用。
 - CLI 未封装的公开能力：`baijimu api <METHOD> <PATH>`。调用前必须确认 Partner API 路径、参数、权限和返回结构。
@@ -72,9 +70,6 @@ metadata:
 - Runtime 调用先列服务，再读取方法定义，最后调用；所有业务参数放入 `--params` 对象，无参数也显式传 `{}`。
 - 复杂 JSON 优先写入临时文件并使用 `@file`，完成后清理不含用户资产的临时文件。
 - 不直接编辑 CLI 认证文件、Bridge Agent 配置、Connector 安装目录或 management token。
-- 模块源码项目可以独立存在；模块定义必须在 Bundle 内创建。模块冻结只生成不可变内部资源，不得把它描述成独立发布、审核、市场上架或安装。
-- HTTP 方法 `methodBody` 的可修改生产者必须直接写官方源契约规定的 snake_case。历史驼峰只允许在受控读取边界转换；发生保存时输出规范字段，规范字段与历史别名冲突时拒绝，不能猜测或继续产生旧字段。这个规则不能扩展成对 `module.json` 或方法外层协议的全文件机械重命名。
-- Bundle Manifest 必须引用精确模块版本；对外审核、市场发布、安装、升级和卸载均以 Bundle 为对象。若本机 CLI 尚未提供 `bundle module`，报告版本过旧并使用其固定版本文档，不要猜测新命令参数或退回独立模块发布。
 - 项目文档和本技能不授予工作区、发布或审核权限。发布者与审核者边界由平台状态源执行，不得用同一身份自行批准、伪造审核状态或直接修改服务器绕过流程。
 - 本地能力排查顺序固定为：本地端运行与授权、Relay 连接、Connector 安装与启用、健康检查、服务和方法上报、调用方权限、审计与日志印证。能力不存在时报告版本或授权缺失，不用手工配置绕过。
 - 不输出 PAT、模型密钥、服务令牌、cookie 或完整认证响应。除非用户明确要求，不使用任何显示 secret 的选项。

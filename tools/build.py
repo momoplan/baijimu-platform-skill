@@ -4,21 +4,20 @@ from __future__ import annotations
 import hashlib
 import re
 import shutil
-import sys
 import zipfile
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SKILL = ROOT
 DIST = ROOT / "dist"
-ARCHIVE = DIST / "baijimu-platform.zip"
-HASH_FILE = DIST / "baijimu-platform.zip.sha256"
-MARKETPLACE_DIR = ROOT / "marketplace" / "baijimu-platform"
-MARKETPLACE_SKILL = MARKETPLACE_DIR / "SKILL.md"
+MARKETPLACE = ROOT / "marketplace"
 FIXED_TIME = (2026, 1, 1, 0, 0, 0)
-EXPECTED = {"SKILL.md"}
 SEMVER = re.compile(r"^[0-9]+\.[0-9]+\.[0-9]+$")
+SKILLS = {
+    "baijimu-platform": ROOT / "SKILL.md",
+    "baijimu-bundle-development": ROOT / "skills" / "baijimu-bundle-development" / "SKILL.md",
+    "baijimu-hosted-service-development": ROOT / "skills" / "baijimu-hosted-service-development" / "SKILL.md",
+}
 
 
 def fail(message: str) -> None:
@@ -39,17 +38,16 @@ def split_frontmatter(skill_text: str) -> tuple[str, str]:
     return match.group(1), skill_text[match.end() :]
 
 
-def render_marketplace(skill_text: str, version: str) -> str:
+def render_marketplace(name: str, skill_text: str, version: str) -> str:
     frontmatter, body = split_frontmatter(skill_text)
     description = next(
-        (line for line in frontmatter.splitlines() if line.startswith("description:")),
-        None,
+        (line for line in frontmatter.splitlines() if line.startswith("description:")), None
     )
     if description is None:
-        fail("SKILL.md frontmatter must contain description")
+        fail(f"{name} frontmatter must contain description")
     market_frontmatter = [
         "---",
-        "name: baijimu-platform",
+        f"name: {name}",
         description,
         f"version: {version}",
         "author: Baijimu",
@@ -72,28 +70,11 @@ def render_marketplace(skill_text: str, version: str) -> str:
     return "\n".join(market_frontmatter) + "\n" + body
 
 
-def validate() -> tuple[list[Path], str]:
-    files = [SKILL / relative for relative in sorted(EXPECTED)]
-    missing = [path for path in files if not path.is_file()]
-    if missing:
-        fail(f"missing skill files: {missing}")
-    relative = {path.relative_to(SKILL).as_posix() for path in files}
-    if relative != EXPECTED:
-        fail(f"skill files differ from expected text-only layout: {sorted(relative)}")
-
-    skill_text = (SKILL / "SKILL.md").read_text(encoding="utf-8")
-    frontmatter, _ = split_frontmatter(skill_text)
-    keys = []
-    for line in frontmatter.splitlines():
-        if not line.strip() or line.startswith((" ", "\t")):
-            continue
-        keys.append(line.split(":", 1)[0])
-    if keys != ["name", "description"]:
-        fail(f"frontmatter must contain only name and description, got {keys}")
-    if "name: baijimu-platform" not in frontmatter:
-        fail("frontmatter name must be baijimu-platform")
-
-    for path in files:
+def validate() -> dict[str, str]:
+    texts: dict[str, str] = {}
+    for name, path in SKILLS.items():
+        if not path.is_file():
+            fail(f"missing skill file: {path}")
         if path.is_symlink():
             fail(f"symlinks are not allowed: {path}")
         data = path.read_bytes()
@@ -102,40 +83,59 @@ def validate() -> tuple[list[Path], str]:
         text = data.decode("utf-8")
         if "/Users/" in text or "lc_pat_" in text:
             fail(f"local path or token-shaped content found: {path}")
-        if path.suffix.lower() != ".md":
-            fail(f"distribution accepts Markdown only: {path}")
+        frontmatter, _ = split_frontmatter(text)
+        keys = [
+            line.split(":", 1)[0]
+            for line in frontmatter.splitlines()
+            if line.strip() and not line.startswith((" ", "\t"))
+        ]
+        if keys != ["name", "description"]:
+            fail(f"{name} frontmatter must contain only name and description, got {keys}")
+        if f"name: {name}" not in frontmatter:
+            fail(f"frontmatter name must be {name}")
+        if "references/" in text:
+            fail(f"{name} must use versioned official docs instead of bundled references")
+        texts[name] = text
+    return texts
 
-    if "references/" in skill_text:
-        fail("SKILL.md must not depend on bundled references; use versioned official docs")
-    return files, skill_text
 
-
-def build(files: list[Path], marketplace_text: str) -> str:
+def build(texts: dict[str, str], version: str) -> dict[str, str]:
     if DIST.exists():
         shutil.rmtree(DIST)
     DIST.mkdir(parents=True)
-    if MARKETPLACE_DIR.exists():
-        shutil.rmtree(MARKETPLACE_DIR)
-    MARKETPLACE_DIR.mkdir(parents=True)
-    MARKETPLACE_SKILL.write_text(marketplace_text, encoding="utf-8")
-    with zipfile.ZipFile(ARCHIVE, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=9) as archive:
-        for path in files:
-            relative = path.relative_to(SKILL).as_posix()
-            info = zipfile.ZipInfo(f"baijimu-platform/{relative}", FIXED_TIME)
+    if MARKETPLACE.exists():
+        shutil.rmtree(MARKETPLACE)
+    MARKETPLACE.mkdir(parents=True)
+
+    digests: dict[str, str] = {}
+    for name, text in texts.items():
+        marketplace_dir = MARKETPLACE / name
+        marketplace_dir.mkdir(parents=True)
+        (marketplace_dir / "SKILL.md").write_text(
+            render_marketplace(name, text, version), encoding="utf-8"
+        )
+
+        archive_path = DIST / f"{name}.zip"
+        with zipfile.ZipFile(
+            archive_path, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=9
+        ) as archive:
+            info = zipfile.ZipInfo(f"{name}/SKILL.md", FIXED_TIME)
             info.compress_type = zipfile.ZIP_DEFLATED
             info.external_attr = 0o100644 << 16
-            archive.writestr(info, path.read_bytes())
-    digest = hashlib.sha256(ARCHIVE.read_bytes()).hexdigest()
-    HASH_FILE.write_text(f"{digest}  {ARCHIVE.name}\n", encoding="utf-8")
-    return digest
+            archive.writestr(info, text.encode("utf-8"))
+        digest = hashlib.sha256(archive_path.read_bytes()).hexdigest()
+        (DIST / f"{name}.zip.sha256").write_text(
+            f"{digest}  {archive_path.name}\n", encoding="utf-8"
+        )
+        digests[name] = digest
+    return digests
 
 
 if __name__ == "__main__":
-    skill_files, source_text = validate()
+    skill_texts = validate()
     release_version = read_version()
-    marketplace = render_marketplace(source_text, release_version)
-    sha256 = build(skill_files, marketplace)
-    print(f"validated {len(skill_files)} text files")
-    print(f"generated {MARKETPLACE_SKILL}")
-    print(f"built {ARCHIVE}")
-    print(f"sha256 {sha256}")
+    skill_digests = build(skill_texts, release_version)
+    print(f"validated {len(skill_texts)} skills")
+    for skill_name, sha256 in skill_digests.items():
+        print(f"built {DIST / f'{skill_name}.zip'}")
+        print(f"sha256 {sha256}")

@@ -11,9 +11,11 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-ARCHIVE = ROOT / "dist" / "baijimu-platform.zip"
-HASH_FILE = ROOT / "dist" / "baijimu-platform.zip.sha256"
-MARKETPLACE_SKILL = ROOT / "marketplace" / "baijimu-platform" / "SKILL.md"
+SKILL_SOURCES = {
+    "baijimu-platform": ROOT / "SKILL.md",
+    "baijimu-bundle-development": ROOT / "skills" / "baijimu-bundle-development" / "SKILL.md",
+    "baijimu-hosted-service-development": ROOT / "skills" / "baijimu-hosted-service-development" / "SKILL.md",
+}
 
 
 class DistributionTest(unittest.TestCase):
@@ -21,93 +23,95 @@ class DistributionTest(unittest.TestCase):
     def setUpClass(cls) -> None:
         subprocess.run([sys.executable, str(ROOT / "tools" / "build.py")], check=True)
 
-    def test_archive_is_text_only_and_portable(self) -> None:
-        with zipfile.ZipFile(ARCHIVE) as archive:
-            names = archive.namelist()
-            self.assertEqual(names, ["baijimu-platform/SKILL.md"])
-            for name in names:
-                self.assertTrue(name.endswith(".md"))
-                archive.read(name).decode("utf-8")
+    def test_each_archive_is_text_only_and_portable(self) -> None:
+        for name in SKILL_SOURCES:
+            with self.subTest(name=name), zipfile.ZipFile(ROOT / "dist" / f"{name}.zip") as archive:
+                self.assertEqual(archive.namelist(), [f"{name}/SKILL.md"])
+                archive.read(f"{name}/SKILL.md").decode("utf-8")
 
-    def test_archive_is_reproducible(self) -> None:
-        first = ARCHIVE.read_bytes()
+    def test_archives_are_reproducible(self) -> None:
+        first = {
+            name: (ROOT / "dist" / f"{name}.zip").read_bytes()
+            for name in SKILL_SOURCES
+        }
         subprocess.run([sys.executable, str(ROOT / "tools" / "build.py")], check=True)
-        self.assertEqual(first, ARCHIVE.read_bytes())
+        for name, content in first.items():
+            self.assertEqual(content, (ROOT / "dist" / f"{name}.zip").read_bytes())
 
-    def test_sha256_matches(self) -> None:
-        recorded = HASH_FILE.read_text(encoding="utf-8").split()[0]
-        actual = hashlib.sha256(ARCHIVE.read_bytes()).hexdigest()
-        self.assertEqual(recorded, actual)
+    def test_sha256_files_match(self) -> None:
+        for name in SKILL_SOURCES:
+            archive = ROOT / "dist" / f"{name}.zip"
+            recorded = (ROOT / "dist" / f"{name}.zip.sha256").read_text(encoding="utf-8").split()[0]
+            self.assertEqual(recorded, hashlib.sha256(archive.read_bytes()).hexdigest())
 
-    def test_marketplace_skill_is_generated_from_canonical_source(self) -> None:
-        source = (ROOT / "SKILL.md").read_text(encoding="utf-8")
-        marketplace = MARKETPLACE_SKILL.read_text(encoding="utf-8")
-        source_match = re.match(r"\A---\n.*?\n---\n", source, re.DOTALL)
-        marketplace_match = re.match(r"\A---\n(.*?)\n---\n", marketplace, re.DOTALL)
-        self.assertIsNotNone(source_match)
-        self.assertIsNotNone(marketplace_match)
-        assert source_match is not None
-        assert marketplace_match is not None
-        self.assertEqual(source[source_match.end() :], marketplace[marketplace_match.end() :])
-
+    def test_marketplace_skills_are_generated_from_canonical_sources(self) -> None:
         version = (ROOT / "VERSION").read_text(encoding="utf-8").strip()
-        metadata = marketplace_match.group(1)
-        self.assertIn(f"version: {version}", metadata)
-        self.assertIn("license: MIT-0", metadata)
-        self.assertIn("platforms: [openclaw, hermes]", metadata)
-        self.assertIn("  openclaw:", metadata)
-        self.assertIn("      bins: [baijimu]", metadata)
-        self.assertIn('        package: "@baijimu/cli"', metadata)
-        self.assertIn("  hermes:", metadata)
-        self.assertIn("    requires_toolsets: [terminal]", metadata)
+        for name, source_path in SKILL_SOURCES.items():
+            source = source_path.read_text(encoding="utf-8")
+            marketplace_path = ROOT / "marketplace" / name / "SKILL.md"
+            marketplace = marketplace_path.read_text(encoding="utf-8")
+            source_match = re.match(r"\A---\n.*?\n---\n", source, re.DOTALL)
+            marketplace_match = re.match(r"\A---\n(.*?)\n---\n", marketplace, re.DOTALL)
+            self.assertIsNotNone(source_match)
+            self.assertIsNotNone(marketplace_match)
+            assert source_match is not None and marketplace_match is not None
+            self.assertEqual(source[source_match.end() :], marketplace[marketplace_match.end() :])
+            metadata = marketplace_match.group(1)
+            self.assertIn(f"name: {name}", metadata)
+            self.assertIn(f"version: {version}", metadata)
+            self.assertIn("license: MIT-0", metadata)
+            self.assertIn("platforms: [openclaw, hermes]", metadata)
+            files = [
+                path.relative_to(marketplace_path.parent).as_posix()
+                for path in marketplace_path.parent.rglob("*") if path.is_file()
+            ]
+            self.assertEqual(files, ["SKILL.md"])
 
-    def test_marketplace_folder_contains_only_the_publishable_skill(self) -> None:
-        files = sorted(
-            path.relative_to(MARKETPLACE_SKILL.parent).as_posix()
-            for path in MARKETPLACE_SKILL.parent.rglob("*")
-            if path.is_file()
-        )
-        self.assertEqual(files, ["SKILL.md"])
-
-    def test_skill_routes_bundle_changes_to_the_canonical_publish_contract(self) -> None:
-        skill = (ROOT / "SKILL.md").read_text(encoding="utf-8")
+    def test_base_skill_routes_without_copying_scenario_manuals(self) -> None:
+        skill = SKILL_SOURCES["baijimu-platform"].read_text(encoding="utf-8")
         for required in [
-            "https://docs.baijimu.com/development/bundle-development/change-and-release/",
-            "https://docs.baijimu.com/development/bundle-development/module-development/http-method-body/",
-            "snake_case",
-            "创建模块版本",
-            "发布不可变 Bundle 版本",
-            "回查工作区审核",
-            "验证资源台账和真实运行时调用",
-            "不得用同一身份自行批准",
-            "面向普通用户和开发者的稳定产品契约只以官方文档站为准",
-            "不得改用复制这些流程的专项技能",
-            "bundle-market.baijimu.com` 是已退役入口",
-            "不得根据 DNS、网络探测或 CLI 健康状态推断需要新建工作区",
-            "不把未登记域名的 DNS 结果描述成平台、Bundle 市场、认证或工作区故障",
-        ]:
-            self.assertIn(required, skill)
-
-    def test_skill_routes_project_git_by_live_main_policy(self) -> None:
-        skill = (ROOT / "SKILL.md").read_text(encoding="utf-8")
-        for required in [
+            "$baijimu-bundle-development",
+            "$baijimu-hosted-service-development",
             "project branch-policy get",
             "`DIRECT`",
             "`PROTECTED`",
-            "快进方式直推 `main`",
-            "用户可以合并自己的分支",
-            "两种策略都禁止删除、强推或非快进覆盖 `main`",
-            "https://docs.baijimu.com/concepts/projects/",
+            "不得用同一身份自行批准",
         ]:
             self.assertIn(required, skill)
-        self.assertNotIn("修改必须通过 `project checkout` 检出 canonical 仓库，在生成的 Codex 分支上", skill)
+        self.assertNotIn("完整执行官方 Bundle 修改与发布清单", skill)
 
-    def test_repository_license_matches_clawhub_license(self) -> None:
+    def test_bundle_skill_keeps_bundle_only_product_boundaries(self) -> None:
+        skill = SKILL_SOURCES["baijimu-bundle-development"].read_text(encoding="utf-8")
+        for required in [
+            "Bundle 是生态资源公开审核、市场分发和 Runtime 安装的唯一交付单元",
+            "数据库及 `databaseType` 不是 Module 声明",
+            "创建模块版本",
+            "不可变 Bundle 版本",
+            "真实 Runtime service/method",
+            "Module 是 Bundle 内部资源",
+            "独立审核、上架、安装或升级",
+        ]:
+            self.assertIn(required, skill)
+
+    def test_hosted_skill_keeps_project_and_migration_boundaries(self) -> None:
+        skill = SKILL_SOURCES["baijimu-hosted-service-development"].read_text(encoding="utf-8")
+        for required in [
+            "Project 是后端应用唯一身份",
+            "不存在并列的",
+            "`hostedServiceId`",
+            "同一个非空完整",
+            "`sourceCommitId`",
+            "Schema → Data",
+            "expand/contract",
+            "Rules 不参与",
+        ]:
+            self.assertIn(required, skill)
+
+    def test_repository_license_matches_marketplace_license(self) -> None:
         license_text = (ROOT / "LICENSE").read_text(encoding="utf-8")
         self.assertTrue(license_text.startswith("MIT No Attribution\n"))
-        self.assertIn("without limitation the rights", license_text)
 
-    def test_installer_unifies_legacy_skills_and_is_idempotent(self) -> None:
+    def test_installer_migrates_legacy_and_installs_all_skills_idempotently(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             agents_root = root / ".agents"
@@ -119,18 +123,14 @@ class DistributionTest(unittest.TestCase):
             legacy_platform.mkdir(parents=True)
             (legacy_platform / "SKILL.md").write_text("legacy platform\n", encoding="utf-8")
             command = [
-                sys.executable,
-                str(ROOT / "tools" / "install_codex.py"),
-                "--agents-root",
-                str(agents_root),
-                "--codex-root",
-                str(codex_root),
+                sys.executable, str(ROOT / "tools" / "install_codex.py"),
+                "--agents-root", str(agents_root), "--codex-root", str(codex_root),
             ]
             subprocess.run(command, check=True)
             subprocess.run(command, check=True)
 
             active_names = sorted(path.name for path in (agents_root / "skills").iterdir())
-            self.assertEqual(active_names, ["baijimu-platform"])
+            self.assertEqual(active_names, sorted(SKILL_SOURCES))
             backups = sorted((agents_root / "skill-backups").glob("*.backup-*"))
             self.assertEqual(len(backups), 2)
             self.assertFalse((codex_root / "skills" / "baijimu-platform").exists())
