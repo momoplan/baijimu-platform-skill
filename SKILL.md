@@ -17,7 +17,7 @@ description: 通过 `baijimu` CLI 使用百积木企业 AI 操作系统的基础
 6. 不自行拼接或探测未由当前 CLI 能力输出、帮助或固定版本文档返回的域名。Bundle 市场操作通过当前 CLI 和 `https://api.baijimu.com` 的统一 Partner API 完成；`bundle-market.baijimu.com` 是已退役入口，其 DNS 不解析不是服务故障，也不能作为升级 CLI 的依据。只有本机命令面、固定版本文档或实际命令明确显示版本不兼容时，才报告需要升级。
 7. 把工作区选择与平台健康分开判断。已有项目属于哪个工作区就使用哪个工作区；只有用户明确需要独立成员、权限、计费、数据隔离或产品归属，或者没有合适的目标工作区时，才建议新建。不得根据 DNS、网络探测或 CLI 健康状态推断需要新建工作区。
 
-百积木官方文档站为 <https://docs.baijimu.com/>：CLI 索引为 <https://docs.baijimu.com/cli/>，Partner API 为 <https://docs.baijimu.com/integration/api/>。`https://www.baijimu.com/docs/` 是兼容重定向入口；不要据此手工拼接版本 URL。索引只用于发现，执行仍服从本机 CLI 返回的固定入口；固定版本页面或 JSON 不可访问时，明确报告该 CLI 版本的文档尚未发布，不得改用其他版本猜测参数。
+百积木官方文档站为 <https://docs.baijimu.com/>。面向 AI 的首选发现入口是 <https://docs.baijimu.com/llms.txt>，结构化页面与机器合同清单是 <https://docs.baijimu.com/docs-manifest.json>；先从这两个入口定位公开 Markdown、版本化 JSON Schema 和示例，不抓取 HTML 内嵌渲染数据。CLI 索引为 <https://docs.baijimu.com/cli/>，Partner API 为 <https://docs.baijimu.com/integration/api/>。`https://www.baijimu.com/docs/` 是兼容重定向入口；不要据此手工拼接版本 URL。索引只用于发现，执行仍服从本机 CLI 返回的固定入口；固定版本页面或 JSON 不可访问时，明确报告该 CLI 版本的文档尚未发布，不得改用其他版本猜测参数。
 
 面向普通用户和开发者的稳定产品契约只以官方文档站为准。场景技能只保存跨版本边界和执行顺序，必须继续读取当前 CLI 帮助及其固定版本文档，不能用技能正文覆盖实时命令面。
 
