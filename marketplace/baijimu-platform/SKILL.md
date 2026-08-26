@@ -1,7 +1,7 @@
 ---
 name: baijimu-platform
 description: 通过 `baijimu` CLI 使用百积木企业 AI 操作系统的基础入口。用于登录认证、能力发现、工作区、项目文件与 Git、智能体会话、模型凭证、平台应用、本地 Connector 和公开 Partner API，并把 Bundle 开发或 Hosted Service 后端开发路由到对应场景技能。适用于能够读取 SKILL.md 并执行本机命令的智能体平台。
-version: 1.6.3
+version: 1.6.4
 author: Baijimu
 license: MIT-0
 platforms: [openclaw, hermes]

@@ -1,7 +1,7 @@
 ---
 name: baijimu-hosted-service-development
 description: 使用 `baijimu` CLI 开发和部署 Hosted Service 后端，包括独立 Project/Git、Rust BuildJob、统一 Artifact 目录、数据库迁移 Artifact、Environment、Slot、Deployment、Endpoint、配置和服务鉴权。用于普通后端应用交付；不用于 Bundle/Module 生命周期、平台服务发布或基础设施变更。
-version: 1.6.3
+version: 1.6.4
 author: Baijimu
 license: MIT-0
 platforms: [openclaw, hermes]
@@ -43,7 +43,9 @@ Deployment、Endpoint、配置、鉴权和迁移执行都通过真实 `projectId
   登记不可变运行/迁移 Artifact。
 - `artifact-service` 拥有统一 Artifact 目录、workspace/Project 归属及 Artifact 查询；CLI 把查询放在
   `rust-build artifact` 命令组下只是工作流分组，不改变服务所有权。
-- `db-service` 拥有 Database Instance、Logical Database、Profile、Allocation 和连接配置解析。
+- `db-service` 拥有 Database Instance、Database Profile 和连接配置解析。开发者创建一个 Database Profile
+  时，平台会在所选 Instance 中同时创建一个 Logical Database 及其 Allocation，并返回可绑定的
+  `profileRef`；Logical Database 和 Allocation 是该 Profile 的内部记录，不是另外两个申请步骤。
 - Hosted Service 能力拥有 Project Environment、Deployment、Endpoint、配置/鉴权绑定和数据库迁移
   Operation/Attempt；它只消费已有 `artifactId`，不在部署时构建。
 - Bundle、Module、App Runtime、`baijimu-agent`、Control Plane、`release-control` 和 Rules 不参与 Hosted
@@ -54,7 +56,8 @@ Deployment、Endpoint、配置、鉴权和迁移执行都通过真实 `projectId
 1. 提交源码并取得完整 Git commit ID。
 2. 用该 commit 创建运行 BuildJob；成功后从统一 Artifact 目录读取真实 `artifactId`，不要把
    `buildJobId` 当制品。
-3. 创建或读取 Project Environment，按需绑定 Slot、Logical Database 和配置 Provider。
+3. 创建或读取 Project Environment，按需分配 Slot，并通过配置 Provider 绑定 Database Profile 返回的
+   `profileRef`。
 4. 部署明确的运行 Artifact；部署后查询 deployment，验证 Endpoint、健康、鉴权和真实业务请求。
 
 同一个运行 Artifact 应能部署到多个 Environment。环境差异、密钥、数据库连接和第三方凭据必须来自
@@ -68,8 +71,8 @@ Environment 或 Config Provider，不能打进 Artifact。
 - 运行、Schema 和 Data Artifact 必须属于同一 workspace、同一 Project，并来自同一个非空完整
   `sourceCommitId`。
 - 部署请求最多携带一个 Schema Artifact 和按参数出现顺序执行的多个 Data Artifact。
-- Hosted Service 在目标 Allocation 上按 Schema → Data 串行迁移，全部成功后才部署运行 Artifact 和切换
-  Endpoint。
+- Hosted Service 在目标 Database Profile 对应的 Allocation 上按 Schema → Data 串行迁移，全部成功后才
+  部署运行 Artifact 和切换 Endpoint。
 - Deployment 中的 Migration Operation 和只追加 Attempt 是状态源；请求被接受不代表迁移成功。
 - 迁移失败不会自动反向已提交的数据库变更。应用必须采用 expand/contract 和向前恢复，不能把程序
   Artifact 回滚误认为数据库回滚。
