@@ -22,7 +22,7 @@ Bundle 是生态资源公开审核、市场分发和 Runtime 安装的唯一交�
 ## 产品不变量
 
 - 模块源码项目可以独立存在；Module 定义必须在 Bundle 内创建。
-- Module 冻结只生成不可变内部版本；Bundle Manifest 必须引用精确 Module 版本。
+- ModuleVersion 创建成功即是不可变内部版本，没有冻结状态；Bundle Manifest 必须引用精确 Module 版本。
 - Module 方法、类型和资源声明不拥有数据库。需要数据库的后端逻辑应放入独立 Hosted Service Project，
   数据库变更使用 `$baijimu-hosted-service-development`。
 - HTTP 方法 `methodBody` 的可修改生产者必须按官方源契约写 `snake_case`。历史别名只允许在受控读取边界
@@ -37,7 +37,7 @@ Bundle 是生态资源公开审核、市场分发和 Runtime 安装的唯一交�
 
 1. 读取当前 Bundle、Project Git、资源定义、精确版本和工作区权限。
 2. 修改源码并验证差异、类型契约和引用闭包。
-3. 提交 Project Git，创建模块版本、冻结所需资源不可变版本并更新 Manifest。
+3. 提交 Project Git，使用 `baijimu bundle module version create` 创建模块版本、创建所需资源不可变版本并更新 Manifest。
 4. 发布不可变 Bundle 版本，回查工作区审核状态。
 5. 提交并回查市场审核；人工审核未完成时只能报告“已提交”。
 6. 在准确 Runtime 上安装或升级 Bundle。
@@ -49,4 +49,4 @@ Bundle 是生态资源公开审核、市场分发和 Runtime 安装的唯一交�
 ## 完成标准
 
 代码提交、不可变资源版本、Bundle 版本、审核、市场状态、目标 Runtime installation 和真实运行时调用必须
-与请求目标一致。权限或人工审核阻塞时，准确停在对应阶段，不把“已冻结”“已提交”或“已安装”互相替代。
+与请求目标一致。权限或人工审核阻塞时，准确停在对应阶段，不把“版本已创建”“已提交”或“已安装”互相替代。

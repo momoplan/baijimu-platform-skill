@@ -57,5 +57,14 @@ if version_parts >= (0, 1, 23):
         raise SystemExit("error: CLI 0.1.23+ is missing bundle module")
     if "\n  create" in module_help or "\n  freeze" in module_help:
         raise SystemExit("error: legacy module publication commands remain publicly visible")
+if version_parts >= (0, 18, 0):
+    version_help = subprocess.run(
+        [binary, "bundle", "module", "version", "--help"],
+        check=True,
+        text=True,
+        capture_output=True,
+    ).stdout
+    if "create" not in version_help:
+        raise SystemExit("error: CLI 0.18.0+ is missing bundle module version create")
 
 print(f"CLI smoke passed: {version}; {len(COMMANDS)} command families")
