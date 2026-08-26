@@ -1,7 +1,7 @@
 ---
 name: baijimu-hosted-service-development
 description: 使用 `baijimu` CLI 开发和部署 Hosted Service 后端，包括独立 Project/Git、Rust BuildJob、统一 Artifact 目录、数据库迁移 Artifact、Environment、Slot、Deployment、Endpoint、配置和服务鉴权。用于普通后端应用交付；不用于 Bundle/Module 生命周期、平台服务发布或基础设施变更。
-version: 1.6.1
+version: 1.6.2
 author: Baijimu
 license: MIT-0
 platforms: [openclaw, hermes]
