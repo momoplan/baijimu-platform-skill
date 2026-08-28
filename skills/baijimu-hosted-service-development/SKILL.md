@@ -12,12 +12,12 @@ Deployment、Endpoint、配置、鉴权和迁移执行都通过真实 `projectId
 ## 开始前
 
 1. 先使用 `$baijimu-platform` 完成 CLI 版本、认证、工作区、Project 和 Git 分支策略确认。
-2. 运行 `baijimu capabilities --offline --json`（旧版不支持时使用各级 `--help`），读取与本机版本绑定的
-   命令结构和官方文档入口。
+2. 按任务运行 `baijimu rust-build --help` 或 `baijimu hosted-service --help`，再只沿目标子命令逐级
+   读取 `--help`；不要加载完整命令树。
 3. 打开 <https://docs.baijimu.com/development/backend-development/>；构建、迁移和部署参数以本机
-   `baijimu rust-build --help`、`baijimu hosted-service --help` 及固定版本文档为准。
+   目标子命令的 `--help` 为准。
 
-固定版本文档缺失或帮助中没有目标参数时，报告版本不匹配，不得直接调用内部服务、借用其他版本参数或
+帮助中没有目标参数时，报告 CLI 版本不支持，不得直接调用内部服务、借用其他版本参数或
 改走 Jenkins。
 
 ## 所有权边界

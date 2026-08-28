@@ -12,12 +12,11 @@ Bundle 是生态资源公开审核、市场分发和 Runtime 安装的唯一交�
 ## 开始前
 
 1. 先使用 `$baijimu-platform` 完成 CLI 版本、认证、工作区和项目确认。
-2. 运行 `baijimu capabilities --offline --json`（旧版不支持时使用各级 `--help`），读取与本机版本绑定的
-   命令结构和官方文档入口。
-3. 打开 <https://docs.baijimu.com/development/bundle-development/>；执行参数仍以固定版本入口和本机
-   `baijimu <command> --help` 为准。
+2. 运行 `baijimu bundle --help`，再只沿本次任务涉及的子命令逐级读取 `--help`；不要加载完整命令树。
+3. 打开 <https://docs.baijimu.com/development/bundle-development/>；执行参数仍以本机目标子命令的
+   `--help` 为准。
 
-固定版本页面缺失时报告 CLI/文档版本不匹配，不得借用其他版本参数、旧独立 Module 流程或服务器内部 API。
+帮助中缺少目标命令时报告 CLI 版本不支持，不得借用其他版本参数、旧独立 Module 流程或服务器内部 API。
 
 ## 产品不变量
 

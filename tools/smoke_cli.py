@@ -36,16 +36,16 @@ if missing:
 for command in COMMANDS:
     subprocess.run([binary, command, "--help"], check=True, text=True, capture_output=True)
 
-capabilities = subprocess.run(
-    [binary, "capabilities", "--offline", "--json"],
-    check=True,
-    text=True,
-    capture_output=True,
-).stdout
-if '"documentation"' not in capabilities or '"offlineCapabilities"' not in capabilities:
-    raise SystemExit("error: CLI offline capabilities are missing versioned documentation")
-
 version_parts = tuple(int(part) for part in version.split("."))
+if version_parts >= (0, 25, 0):
+    if "capabilities" in help_text:
+        raise SystemExit("error: retired capabilities command remains in top-level help")
+    retired = subprocess.run(
+        [binary, "capabilities"], text=True, capture_output=True
+    )
+    if retired.returncode == 0:
+        raise SystemExit("error: retired capabilities command is still executable")
+
 if version_parts >= (0, 1, 23):
     bundle_help = subprocess.run(
         [binary, "bundle", "--help"], check=True, text=True, capture_output=True

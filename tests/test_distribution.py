@@ -80,6 +80,18 @@ class DistributionTest(unittest.TestCase):
             self.assertIn(required, skill)
         self.assertNotIn("完整执行官方 Bundle 修改与发布清单", skill)
 
+    def test_skills_use_progressive_help_without_retired_capabilities(self) -> None:
+        for name, source_path in SKILL_SOURCES.items():
+            with self.subTest(name=name):
+                skill = source_path.read_text(encoding="utf-8")
+                self.assertNotIn("baijimu capabilities", skill)
+                self.assertNotIn("offlineCapabilities", skill)
+                self.assertIn("--help", skill)
+
+        smoke = (ROOT / "tools" / "smoke_cli.py").read_text(encoding="utf-8")
+        self.assertIn("version_parts >= (0, 25, 0)", smoke)
+        self.assertIn("retired capabilities command is still executable", smoke)
+
     def test_bundle_skill_keeps_bundle_only_product_boundaries(self) -> None:
         skill = SKILL_SOURCES["baijimu-bundle-development"].read_text(encoding="utf-8")
         for required in [
