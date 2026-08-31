@@ -4,7 +4,6 @@ on:
   pull_request:
     paths:
       - "SKILL.md"
-      - "skills/**"
       - "VERSION"
       - "marketplace/**"
       - "tools/build.py"
@@ -40,20 +39,6 @@ jobs:
             --categories productivity \
             --topics baijimu,lowcode,automation,cli \
             --dry-run
-          clawhub skill publish marketplace/baijimu-bundle-development \
-            --slug baijimu-bundle-development \
-            --name "百积木 Bundle 开发" \
-            --version "$(tr -d '\n' < VERSION)" \
-            --categories productivity \
-            --topics baijimu,lowcode,bundle,development \
-            --dry-run
-          clawhub skill publish marketplace/baijimu-hosted-service-development \
-            --slug baijimu-hosted-service-development \
-            --name "百积木 Hosted Service 开发" \
-            --version "$(tr -d '\n' < VERSION)" \
-            --categories productivity \
-            --topics baijimu,lowcode,hosted-service,development \
-            --dry-run
 
   publish:
     if: github.event_name == 'workflow_dispatch'
@@ -74,7 +59,7 @@ jobs:
         env:
           CLAWHUB_TOKEN: ${{ secrets.CLAWHUB_TOKEN }}
         run: clawhub login --token "${CLAWHUB_TOKEN}"
-      - name: Publish ClawHub skills
+      - name: Publish ClawHub skill
         run: |
           clawhub skill publish marketplace/baijimu-platform \
             --slug baijimu-platform \
@@ -82,15 +67,3 @@ jobs:
             --version "$(tr -d '\n' < VERSION)" \
             --categories productivity \
             --topics baijimu,lowcode,automation,cli
-          clawhub skill publish marketplace/baijimu-bundle-development \
-            --slug baijimu-bundle-development \
-            --name "百积木 Bundle 开发" \
-            --version "$(tr -d '\n' < VERSION)" \
-            --categories productivity \
-            --topics baijimu,lowcode,bundle,development
-          clawhub skill publish marketplace/baijimu-hosted-service-development \
-            --slug baijimu-hosted-service-development \
-            --name "百积木 Hosted Service 开发" \
-            --version "$(tr -d '\n' < VERSION)" \
-            --categories productivity \
-            --topics baijimu,lowcode,hosted-service,development

@@ -15,8 +15,6 @@ FIXED_TIME = (2026, 1, 1, 0, 0, 0)
 SEMVER = re.compile(r"^[0-9]+\.[0-9]+\.[0-9]+$")
 SKILLS = {
     "baijimu-platform": ROOT / "SKILL.md",
-    "baijimu-bundle-development": ROOT / "skills" / "baijimu-bundle-development" / "SKILL.md",
-    "baijimu-hosted-service-development": ROOT / "skills" / "baijimu-hosted-service-development" / "SKILL.md",
 }
 
 
