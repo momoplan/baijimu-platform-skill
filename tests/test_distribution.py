@@ -75,6 +75,11 @@ class DistributionTest(unittest.TestCase):
             "docs-manifest.json",
             "逐级读取 `--help`",
             "权威状态源回查一致",
+            "hosted-service-capability.md",
+            "baijimu bundle capability --help",
+            "applicationRuntimeId",
+            "resourceLocator",
+            "Environment Secret",
         ]:
             self.assertIn(required, skill)
         for duplicated_detail in [
@@ -95,6 +100,7 @@ class DistributionTest(unittest.TestCase):
         smoke = (ROOT / "tools" / "smoke_cli.py").read_text(encoding="utf-8")
         self.assertIn("version_parts >= (0, 25, 0)", smoke)
         self.assertIn("retired capabilities command is still executable", smoke)
+        self.assertIn("bundle capability", smoke)
 
     def test_repository_license_matches_marketplace_license(self) -> None:
         license_text = (ROOT / "LICENSE").read_text(encoding="utf-8")

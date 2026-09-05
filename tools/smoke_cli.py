@@ -66,5 +66,17 @@ if version_parts >= (0, 18, 0):
     ).stdout
     if "create" not in version_help:
         raise SystemExit("error: CLI 0.18.0+ is missing bundle module version create")
+if version_parts >= (0, 48, 1):
+    capability_help = subprocess.run(
+        [binary, "bundle", "capability", "--help"],
+        check=True,
+        text=True,
+        capture_output=True,
+    ).stdout
+    for command in ["scopes", "client", "token"]:
+        if command not in capability_help:
+            raise SystemExit(
+                f"error: CLI 0.48.1+ is missing bundle capability {command}"
+            )
 
 print(f"CLI smoke passed: {version}; {len(COMMANDS)} command families")
