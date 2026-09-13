@@ -24,6 +24,10 @@ description: 通过 `baijimu` CLI 使用百积木企业 AI 操作系统。用于
 5. 写入前读取目标对象和当前状态，用 CLI 的资源解析或精确查询把名称转换为稳定 ID；零匹配或多匹配时停止，不取模糊结果的第一项。
 6. 明确目标、权限、参数和副作用后执行；完成后用对应状态源回查。发布、安装、升级、部署和服务调用还要验证正式入口或真实 Runtime 行为。
 
+## 平台应用与 Bundle 版本
+
+创建版本使用 `platform-app version create` 和 `bundle version create`，成功后版本内容即不可变，没有额外的 `publish` 或 `freeze` 阶段。创建平台应用已经确定唯一归属 Bundle；创建应用版本不会自动更新 Bundle 清单。应在归属 Bundle 中选择精确应用版本，创建 Bundle 版本，再安装或升级目标工作区。市场发布是独立操作，不能把版本创建成功当作上架或安装成功。具体参数和流程以当前命令帮助及官方文档为准。
+
 ## Bundle Capability
 
 Hosted Service 需要查询自有 Bundle 的已安装资源，或查看、启动工作流与定时任务时，先读取
