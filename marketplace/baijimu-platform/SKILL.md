@@ -1,7 +1,7 @@
 ---
 name: baijimu-platform
 description: 通过 `baijimu` CLI 使用百积木企业 AI 操作系统。用于认证、工作区与项目、Bundle 和 Module、Hosted Service、运行时服务、智能体、平台应用、本地 Connector，以及其他需要查询或操作百积木平台的任务。适用于能够读取 SKILL.md、访问百积木官方文档并执行本机命令的智能体平台。
-version: 2.0.2
+version: 2.0.3
 author: Baijimu
 license: MIT-0
 platforms: [openclaw, hermes]
@@ -39,6 +39,16 @@ metadata:
 4. 已知场景时直接读取对应的官方文档页面；路径未知时从 <https://docs.baijimu.com/llms.txt> 或 <https://docs.baijimu.com/docs-manifest.json> 定位 Markdown、版本化 Schema 和示例，不抓取 HTML 内嵌数据，也不以搜索结果或历史快照覆盖官方文档。
 5. 写入前读取目标对象和当前状态，用 CLI 的资源解析或精确查询把名称转换为稳定 ID；零匹配或多匹配时停止，不取模糊结果的第一项。
 6. 明确目标、权限、参数和副作用后执行；完成后用对应状态源回查。发布、安装、升级、部署和服务调用还要验证正式入口或真实 Runtime 行为。
+
+## 前端项目类型与版本构建
+
+处理前端创建、构建、发布或部署时，先运行 `baijimu project type list --json`，再按用户真实交付目标选择稳定类型键：
+
+- 普通静态网站、官网、活动页或独立 Dashboard 使用 `REACT_STATIC_APPLICATION`。创建或复用项目后必须运行 `baijimu project action list <PROJECT_ID> --json`，读取实际 `buildReactProject` 参数 Schema，执行该动作并等待成功；只有动作成功登记的严格 SemVer 项目版本才能传给 `site deployment create`。
+- 需要平台身份、工作区应用入口、Runtime 能力或随 Bundle 安装的前端使用 `PLATFORM_APPLICATION`。同一项目保存前端源码和平台应用声明，通过平台应用版本与 Bundle 安装链路交付，不创建普通 Site Deployment，也不另建一个 React 静态项目保存第二份源码。
+- `WEB_APPLICATION` 是不提供 `buildReactProject` 和不可变项目版本的旧版通用类型，不得用于新建上述两类前端项目。项目动作中没有 `buildReactProject` 时停止部署并纠正项目类型，不能虚构版本、把 Git SHA 当版本或直接重试 Site Deployment。
+
+收到 `PROJECT_VERSION_NOT_FOUND` 时先把它作为下游业务错误原样解释：这表示该项目的目标版本尚未由构建动作成功登记。先核对项目类型、动作列表和构建任务状态；不要把它归因于站点服务暂时不可用。详细流程读取 <https://docs.baijimu.com/development/frontend-development/build-and-publish.md>。
 
 ## 平台应用与 Bundle 版本
 
