@@ -1,7 +1,7 @@
 ---
 name: baijimu-platform
-description: 通过 `baijimu` CLI 使用百积木企业 AI 操作系统。用于认证、工作区与项目、Bundle 和 Module、Hosted Service、运行时服务、智能体、平台应用、本地 Connector，以及其他需要查询或操作百积木平台的任务。适用于能够读取 SKILL.md、访问百积木官方文档并执行本机命令的智能体平台。
-version: 2.0.4
+description: 使用百积木构建、分发和运行业务包（Bundle），将专业知识、业务流程和工具能力交付给团队或企业。平台提供企业级 AI Coding 能力和办公基础设施，支撑业务包的构建、交付与协作使用。通过官方文档理解流程，通过本机 baijimu CLI 执行。
+version: 2.0.5
 author: Baijimu
 license: MIT-0
 platforms: [openclaw, hermes]
@@ -21,55 +21,24 @@ metadata:
 
 # 百积木平台
 
-通过本机 `baijimu` CLI 操作百积木。本技能是统一入口，不复制产品手册、领域架构、命令参数、Schema 或资源清单。
+百积木是业务包（Bundle）的构建、分发与运行平台。通过提供企业级 AI Coding 能力和办公基础设施，帮助个人和团队将专业知识、业务流程及工具能力封装成可安装的业务包，交付给团队或企业使用，并管理授权、版本与升级。本技能提供能力概览和操作入口，详细流程、接口与示例由官方文档维护。
 
-## 权威来源
+## 平台能做什么
 
-- <https://docs.baijimu.com/> 是面向用户和开发者的产品、架构与工作流契约。
-- 本机目标命令逐级 `--help` 是当前 CLI 版本的命令与参数事实来源。
-- 工作区中的 `list`、`get`、`current`、`status`、运行时目录和审计结果是动态资源与执行状态的事实来源。
+- 构建业务包：用智能体、工作流、定时任务、业务模块与应用组合 Bundle，按需通过 AI Coding 开发配套网站、工具和后端服务。
+- 分发业务包：发布 Bundle，向指定工作区交付，或通过市场公开分发。
+- 运行与协作：依托工作区、成员、权限、模型和消息渠道等办公基础设施使用专业能力，通过公开 API 与本地 Connector 接入外部系统和用户设备。
+- 持续维护：管理源码、版本、授权、安装与升级，查询部署、执行状态和日志，验证业务结果。
 
-三者不一致时不要猜测或自行增加兼容逻辑；保留实际版本、命令和错误，报告文档、CLI 或运行时状态之间的不一致。
+## 如何开展任务
 
-## 使用方式
-
-1. 运行 `baijimu --version`。命令不在 `PATH` 时，检查官方固定安装位置：Windows 为 `$env:LOCALAPPDATA\Baijimu\bin\baijimu.exe`，macOS/Linux 为 `~/.local/bin/baijimu`。固定位置也不存在时，提示用户先安装官方 CLI，不要静默下载。
-2. 运行 `baijimu auth status --verify`；未登录时运行 `baijimu auth login`，由用户完成授权。
-3. 运行 `baijimu --help`，再只沿当前任务所需的命令路径逐级读取 `--help`。帮助中不存在的命令不得执行，也不要一次加载完整命令树。
-4. 已知场景时直接读取对应的官方文档页面；路径未知时从 <https://docs.baijimu.com/llms.txt> 或 <https://docs.baijimu.com/docs-manifest.json> 定位 Markdown、版本化 Schema 和示例，不抓取 HTML 内嵌数据，也不以搜索结果或历史快照覆盖官方文档。
-5. 写入前读取目标对象和当前状态，用 CLI 的资源解析或精确查询把名称转换为稳定 ID；零匹配或多匹配时停止，不取模糊结果的第一项。
-6. 明确目标、权限、参数和副作用后执行；完成后用对应状态源回查。发布、安装、升级、部署和服务调用还要验证正式入口或真实 Runtime 行为。
-
-## 前端项目类型与版本构建
-
-处理前端创建、构建、发布或部署时，先运行 `baijimu project type list --json`，再按用户真实交付目标选择稳定类型键：
-
-- 普通静态网站、官网、活动页或独立 Dashboard 使用 `REACT_STATIC_APPLICATION`。创建或复用项目后，先按完整 Git 提交创建严格 SemVer 项目版本，再用 `baijimu project build create <PROJECT_ID> --workspace-id <WORKSPACE_ID> --params @<BUILD_PARAMS_FILE>` 构建该版本，用 `baijimu project build status <PROJECT_ID> <JOB_ID> --workspace-id <WORKSPACE_ID> --json` 等待成功。参数和版本创建流程以当前命令帮助及官方前端构建文档为准；只有构建成功的项目版本才能传给 `site deployment create`。
-- 需要平台身份、工作区应用入口、Runtime 能力或随 Bundle 安装的前端使用 `PLATFORM_APPLICATION`。同一项目保存前端源码和平台应用声明，通过平台应用版本与 Bundle 安装链路交付，不创建普通 Site Deployment，也不另建一个 React 静态项目保存第二份源码。
-- `WEB_APPLICATION` 是不提供 `buildReactProject` 和不可变项目版本的旧版通用类型，不得用于新建上述两类前端项目。项目动作中没有 `buildReactProject` 时停止部署并纠正项目类型，不能虚构版本、把 Git SHA 当版本或直接重试 Site Deployment。
-
-收到 `PROJECT_VERSION_NOT_FOUND` 时先把它作为下游业务错误原样解释：这表示该项目的目标版本尚未由构建动作成功登记。先核对项目类型、动作列表和构建任务状态；不要把它归因于站点服务暂时不可用。详细流程读取 <https://docs.baijimu.com/development/frontend-development/build-and-publish.md>。
-
-## 平台应用与 Bundle 版本
-
-创建版本使用 `platform-app version create` 和 `bundle version create`，成功后版本内容即不可变，没有额外的 `publish` 或 `freeze` 阶段。创建平台应用已经确定唯一归属 Bundle；创建应用版本不会自动更新 Bundle 清单。应在归属 Bundle 中选择精确应用版本，创建 Bundle 版本，再安装或升级目标工作区。市场发布是独立操作，不能把版本创建成功当作上架或安装成功。具体参数和流程以当前命令帮助及官方文档为准。
-
-## Bundle Capability
-
-Hosted Service 需要查询自有 Bundle 的已安装资源，或查看、启动工作流与定时任务时，先读取
-<https://docs.baijimu.com/development/bundle-development/hosted-service-capability.md> 和页面引用的版本化
-OpenAPI，再运行 `baijimu bundle capability --help` 逐级发现当前管理命令。
-
-只使用资源查询返回的 `resourceLocator`，不要自行构造；每个数据请求都显式传入权威查询得到的
-`applicationRuntimeId`。Capability Token 只放入目标 Hosted Service Environment Secret，不输出到提示词、
-聊天、源码、Artifact 或日志。Token、Client、scope 与 Bundle 所有权必须在操作前后分别回查。
+1. 根据用户目标按需读取 <https://docs.baijimu.com/>。不知道页面路径时，从 <https://docs.baijimu.com/llms.txt> 或 <https://docs.baijimu.com/docs-manifest.json> 定位相关 Markdown、Schema 和示例。
+2. 运行 `baijimu --version` 和 `baijimu --help`，再沿当前任务所需的命令路径逐级读取 `--help`，确认实际命令与参数。CLI 不在 `PATH` 时，检查官方安装位置：Windows 为 `$env:LOCALAPPDATA\Baijimu\bin\baijimu.exe`，macOS/Linux 为 `~/.local/bin/baijimu`。未安装时提示用户安装，不静默下载。
+3. 访问工作区资源前运行 `baijimu auth status --verify`；未登录时使用 `baijimu auth login`。从当前平台查询准确目标、权限与状态；项目源码按官方 Git 流程检出和修改，遵守项目实际分支策略；Runtime 调用参数从当前方法定义读取。
+4. 在用户授权范围内执行，并回查结果。开发任务包含相应的验证、交付与正式入口验证，不能把提交、构建或版本创建成功当作完整任务完成。
 
 ## 执行边界
 
-- 不编造 workspaceId、projectId、businessId、method、moduleId、versionId、sessionId 或其他协议标识。
-- 不用内部 API、手工数据库或服务器修改、缓存态或临时兼容分支绕过官方文档和公开 CLI 定义的产品流程。
-- 不直接编辑认证文件或输出 PAT、模型密钥、服务令牌、cookie 及完整认证响应。
+官方文档定义产品流程，本机 CLI 帮助定义执行参数，平台实时查询定义资源身份和状态。三者不一致时保留实际错误并说明缺口，不猜测标识或参数，不通过内部 API、手工数据库或服务器修改绕过产品流程。
 
-查询、帮助、列表、状态和审计可直接执行。创建、更新、安装、升级、发布、部署或业务调用必须确保准确目标和参数；删除、卸载、回滚、重置、撤回、释放资源、覆盖远端内容、产生费用或向外部发送消息前，必须获得用户对准确目标的明确授权。
-
-只有操作成功、权威状态源回查一致且所需端到端验证通过时，才报告完成。
+不输出或直接编辑认证凭据。删除、卸载、回滚、重置、覆盖远端内容、产生费用或向外部发送消息前，确认用户已明确授权准确目标与操作。

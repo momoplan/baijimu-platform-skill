@@ -70,16 +70,9 @@ class DistributionTest(unittest.TestCase):
     def test_skill_is_a_thin_documentation_and_cli_entrypoint(self) -> None:
         skill = SKILL_SOURCE.read_text(encoding="utf-8")
         for required in [
-            "本技能是统一入口",
             "https://docs.baijimu.com/",
             "docs-manifest.json",
             "逐级读取 `--help`",
-            "权威状态源回查一致",
-            "hosted-service-capability.md",
-            "baijimu bundle capability --help",
-            "applicationRuntimeId",
-            "resourceLocator",
-            "Environment Secret",
         ]:
             self.assertIn(required, skill)
         for duplicated_detail in [

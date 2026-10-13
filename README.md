@@ -1,5 +1,7 @@
 # Baijimu Platform Skill
 
+百积木是业务包（Bundle）的构建、分发与运行平台，以企业级 AI Coding 能力和办公基础设施支撑专业能力的封装与交付。入口技能只介绍能力与操作入口，详细产品流程由官方文档维护。
+
 一个平台无关的纯文本 Agent Skill，通过本机
 [`baijimu`](https://www.npmjs.com/package/@baijimu/cli) CLI 使用百积木平台。
 
@@ -15,6 +17,8 @@ Bundle、Module、Hosted Service、事件、工作流、数据库等产品与架
 - `marketplace/baijimu-platform/SKILL.md`；正文与权威源一致，并增加统一版本、许可和运行要求。
 
 不要手工编辑 `marketplace/` 或 `dist/`。
+
+客户端不维护第二份技能正文。先在本仓库审查源文件并发布准确版本，再同步客户端的固定版本、正文和 ZIP SHA-256；客户端 CI 与发布流程必须回查该上游发行版，拒绝脱离上游的正文修改。不得自动跟随主线或 `latest`。
 
 ```bash
 python3 tools/build.py
