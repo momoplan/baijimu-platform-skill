@@ -1,7 +1,7 @@
 ---
 name: baijimu-platform
 description: 使用百积木构建、分发和运行业务包（Bundle），将专业知识、业务流程和工具能力交付给团队或企业。平台提供企业级 AI Coding 能力和办公基础设施，支撑业务包的构建、交付与协作使用。通过官方文档理解流程，通过本机 baijimu CLI 执行。
-version: 2.0.6
+version: 2.0.7
 author: Baijimu
 license: MIT-0
 platforms: [openclaw, hermes]
