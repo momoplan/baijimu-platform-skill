@@ -30,6 +30,8 @@ metadata:
 - 运行与协作：依托工作区、成员、权限、模型和消息渠道等办公基础设施使用专业能力，通过公开 API 与本地 Connector 接入外部系统和用户设备。
 - 持续维护：管理源码、版本、授权、安装与升级，查询部署、执行状态和日志，验证业务结果。
 
+Bundle 不声明其他 Bundle 的安装依赖，资源之间通过运行时引用和配置协作。语义校验在开发和创建版本时完成，安装交付已验证的资源与执行产物；安装、绑定生效和实际调用分别确认。Workflow、Timer 和 Event Trigger 的外部服务通过本包 Module 属性绑定，直接资源引用限定本包，不新增独立启用流程。执行主体首次安装默认安装人，后续配置和升级保留该主体；Timer 沿用自身启停与调度设置。具体规则见官方文档的 Bundle 开发章节。
+
 ## 如何开展任务
 
 1. 根据用户目标按需读取 <https://docs.baijimu.com/>。不知道页面路径时，从 <https://docs.baijimu.com/llms.txt> 或 <https://docs.baijimu.com/docs-manifest.json> 定位相关 Markdown、Schema 和示例。
