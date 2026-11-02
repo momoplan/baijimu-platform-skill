@@ -91,9 +91,10 @@ class DistributionTest(unittest.TestCase):
         self.assertIn("--help", skill)
 
         smoke = (ROOT / "tools" / "smoke_cli.py").read_text(encoding="utf-8")
-        self.assertIn("version_parts >= (0, 25, 0)", smoke)
-        self.assertIn("retired capabilities command is still executable", smoke)
-        self.assertIn("bundle capability", smoke)
+        self.assertIn("COMMAND_PATHS", smoke)
+        self.assertIn('("runtime", "service")', smoke)
+        self.assertIn('("bundle", "resource", "module")', smoke)
+        self.assertIn("RETIRED_ROOTS", smoke)
 
     def test_repository_license_matches_marketplace_license(self) -> None:
         license_text = (ROOT / "LICENSE").read_text(encoding="utf-8")
